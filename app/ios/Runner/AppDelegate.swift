@@ -5,7 +5,7 @@ import UIKit
 import Vision
 
 @main
-@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIAdaptivePresentationControllerDelegate {
   private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "zh-CN"))
   private var audioEngine = AVAudioEngine()
   private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
@@ -104,18 +104,27 @@ import Vision
   }
 
   private func showPicker(source: UIImagePickerController.SourceType, rootVC: UIViewController, result: @escaping FlutterResult) {
+    pendingOcrResult?(FlutterError(code: "CANCELLED", message: "Đã huỷ chọn ảnh", details: nil))
     pendingOcrResult = result
     let picker = UIImagePickerController()
     picker.sourceType = source
     picker.delegate = self
-    picker.modalPresentationStyle = .fullScreen
+    picker.presentationController?.delegate = self
     rootVC.present(picker, animated: true)
+  }
+
+  func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+    if let res = pendingOcrResult {
+      pendingOcrResult = nil
+      res(nil)
+    }
   }
 
   func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
     picker.dismiss(animated: true)
-    pendingOcrResult?(FlutterError(code: "CANCELLED", message: "Đã huỷ chọn ảnh", details: nil))
+    let res = pendingOcrResult
     pendingOcrResult = nil
+    res?(nil)
   }
 
   func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {

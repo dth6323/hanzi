@@ -159,6 +159,44 @@ class _PracticeScreenState extends State<PracticeScreen> {
               textAlign: TextAlign.center,
               style: const TextStyle(color: AppColors.muted),
             ),
+          if (_chars.length > 1) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 44,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _chars.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (_, i) {
+                  final active = i == _index;
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: () => _go(i - _index),
+                    child: Container(
+                      width: 44,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: active ? AppColors.primary : AppColors.surface2,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: active ? AppColors.gold : Colors.white10,
+                        ),
+                      ),
+                      child: Text(
+                        _chars[i].char,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight:
+                              active ? FontWeight.w800 : FontWeight.w500,
+                          color: active ? Colors.white : AppColors.text,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
           const SizedBox(height: 14),
           Center(
             child: ConstrainedBox(

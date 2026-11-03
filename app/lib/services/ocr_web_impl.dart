@@ -15,27 +15,51 @@ Future<OcrCaptureResult?> pickWebImageAndOcr({bool useCamera = false}) async {
   if (useCamera) {
     input.setAttribute('capture', 'environment');
   }
+
+  void finish([Uint8List? bytes]) {
+    if (!completer.isCompleted) {
+      completer.complete(bytes);
+    }
+  }
+
   input.onChange.listen((_) {
     final files = input.files;
     if (files == null || files.isEmpty) {
-      completer.complete(null);
+      finish(null);
       return;
     }
     final reader = html.FileReader();
     reader.onLoadEnd.listen((_) {
       final res = reader.result;
       if (res is Uint8List) {
-        completer.complete(res);
+        finish(res);
       } else if (res is ByteBuffer) {
-        completer.complete(res.asUint8List());
+        finish(res.asUint8List());
       } else {
-        completer.complete(null);
+        finish(null);
       }
     });
+    reader.onError.listen((_) => finish(null));
     reader.readAsArrayBuffer(files.first);
   });
+
+  // Listen to standard 'cancel' event (iOS 16.4+ / modern browsers)
+  input.addEventListener('cancel', (_) => finish(null));
+
+  // Fallback for older iOS Safari when user dismisses Camera/Photo sheet without picking:
+  // when window regains focus and no file is selected after 600ms, resolve null.
+  late StreamSubscription<html.Event> focusSub;
+  focusSub = html.window.onFocus.listen((_) {
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (!completer.isCompleted && (input.files == null || input.files!.isEmpty)) {
+        finish(null);
+      }
+    });
+  });
+
   input.click();
   final bytes = await completer.future;
+  await focusSub.cancel();
   if (bytes == null) return null;
   return runBrowserOcrOnBytes(bytes);
 }

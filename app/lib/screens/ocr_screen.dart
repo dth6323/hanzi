@@ -71,9 +71,10 @@ class _OcrScreenState extends State<OcrScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final errStr = e.toString();
         setState(() {
           _busy = false;
-          _statusMsg = 'Lỗi quét ảnh: $e';
+          _statusMsg = errStr.contains('CANCELLED') ? null : 'Lỗi quét ảnh: $e';
         });
       }
     }

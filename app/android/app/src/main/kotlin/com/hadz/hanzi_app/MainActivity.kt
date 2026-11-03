@@ -98,7 +98,7 @@ class MainActivity : FlutterActivity() {
         val res = pendingOcrResult ?: return
         if (resultCode != Activity.RESULT_OK || data == null) {
             pendingOcrResult = null
-            res.error("CANCELLED", "Đã huỷ chọn ảnh", null)
+            res.success(null)
             return
         }
 
