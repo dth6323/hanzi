@@ -26,6 +26,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
   String _feedback = '';
   Color _feedbackColor = AppColors.muted;
   int? _score;
+  final Map<String, int> _attemptsMap = {};
+  final Map<String, int> _sessionMap = {};
 
   @override
   void initState() {
@@ -36,7 +38,11 @@ class _PracticeScreenState extends State<PracticeScreen> {
   Future<void> _load() async {
     for (final c in widget.chars) {
       final hc = await DictDb.instance.char(c);
-      if (hc != null && hc.canWrite) _chars.add(hc);
+      if (hc != null && hc.canWrite) {
+        _chars.add(hc);
+        final st = await UserDb.instance.charWritingStat(c);
+        _attemptsMap[c] = st.attempts;
+      }
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -60,9 +66,12 @@ class _PracticeScreenState extends State<PracticeScreen> {
     await UserDb.instance.recordWriting(_cur.char, mistakes, score);
     setState(() {
       _score = score;
+      _attemptsMap[_cur.char] = (_attemptsMap[_cur.char] ?? 0) + 1;
+      _sessionMap[_cur.char] = (_sessionMap[_cur.char] ?? 0) + 1;
+      final totalDone = _attemptsMap[_cur.char]!;
       _feedback = mistakes == 0
-          ? 'Hoàn hảo! Không sai nét nào'
-          : 'Hoàn thành · sai $mistakes lần';
+          ? 'Hoàn hảo! (Lần viết thứ $totalDone)'
+          : 'Hoàn thành lần thứ $totalDone · sai $mistakes nét';
       _feedbackColor = AppColors.gold;
     });
   }
@@ -148,6 +157,25 @@ class _PracticeScreenState extends State<PracticeScreen> {
                       color: AppColors.gold,
                       fontWeight: FontWeight.w600)),
               SpeakButton(c.char),
+              Container(
+                margin: const EdgeInsets.only(left: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.surface2,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white12),
+                ),
+                child: Text(
+                  'Đã viết: ${_attemptsMap[c.char] ?? 0} lần'
+                  '${(_sessionMap[c.char] ?? 0) > 0 ? " (hôm nay +${_sessionMap[c.char]})" : ""}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.gold,
+                  ),
+                ),
+              ),
             ],
           ),
           if (c.hanviet.isNotEmpty || c.meanings.isNotEmpty)
@@ -169,11 +197,13 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 separatorBuilder: (_, _) => const SizedBox(width: 8),
                 itemBuilder: (_, i) {
                   final active = i == _index;
+                  final ch = _chars[i].char;
+                  final cnt = _attemptsMap[ch] ?? 0;
                   return InkWell(
                     borderRadius: BorderRadius.circular(10),
                     onTap: () => _go(i - _index),
                     child: Container(
-                      width: 44,
+                      width: 48,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: active ? AppColors.primary : AppColors.surface2,
@@ -182,14 +212,35 @@ class _PracticeScreenState extends State<PracticeScreen> {
                           color: active ? AppColors.gold : Colors.white10,
                         ),
                       ),
-                      child: Text(
-                        _chars[i].char,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight:
-                              active ? FontWeight.w800 : FontWeight.w500,
-                          color: active ? Colors.white : AppColors.text,
-                        ),
+                      child: Stack(
+                        children: [
+                          Center(
+                            child: Text(
+                              ch,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight:
+                                    active ? FontWeight.w800 : FontWeight.w500,
+                                color: active ? Colors.white : AppColors.text,
+                              ),
+                            ),
+                          ),
+                          if (cnt > 0)
+                            Positioned(
+                              right: 3,
+                              top: 2,
+                              child: Text(
+                                '${cnt}x',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                  color: active
+                                      ? Colors.white70
+                                      : AppColors.gold,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   );

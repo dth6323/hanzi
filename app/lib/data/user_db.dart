@@ -354,6 +354,21 @@ class UserDb {
   Future<List<Map<String, Object?>>> writingStats() =>
       _db.query('writing', orderBy: 'ts DESC');
 
+  Future<({int attempts, int best})> charWritingStat(String char) async {
+    final rows = await _db.query(
+      'writing',
+      columns: ['attempts', 'best'],
+      where: 'char = ?',
+      whereArgs: [char],
+      limit: 1,
+    );
+    if (rows.isEmpty) return (attempts: 0, best: 0);
+    return (
+      attempts: (rows.first['attempts'] as int?) ?? 0,
+      best: (rows.first['best'] as int?) ?? 0,
+    );
+  }
+
   Future<void> recordQuizRun(String mode, int score, int total) async {
     await _db.insert('quiz_runs', {
       'mode': mode,

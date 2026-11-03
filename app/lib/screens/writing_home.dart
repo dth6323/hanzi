@@ -112,6 +112,10 @@ class _WritingHomeState extends State<WritingHome> {
   Widget build(BuildContext context) {
     final weak = _stats.where((s) => (s['best'] as int) < 70).toList();
     final selChars = _selectedChars;
+    final totalAttempts = _stats.fold<int>(
+        0, (sum, s) => sum + ((s['attempts'] as int?) ?? 0));
+    final masteredChars =
+        _stats.where((s) => ((s['best'] as int?) ?? 0) >= 85).length;
 
     return SafeArea(
       child: Stack(
@@ -127,7 +131,28 @@ class _WritingHomeState extends State<WritingHome> {
                 'Tìm và chọn các từ vựng muốn luyện viết theo thứ tự nét',
                 style: TextStyle(color: AppColors.muted),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _statItem(
+                        '$totalAttempts', 'Tổng lần đã viết ✍️', AppColors.gold),
+                    _statItem('${_stats.length}', 'Số chữ đã tập',
+                        AppColors.primary),
+                    _statItem(
+                        '$masteredChars', 'Viết đẹp (≥85đ)', AppColors.hint),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
               TextField(
                 key: const Key('practice_input'),
                 controller: _ctrl,
@@ -263,11 +288,16 @@ class _WritingHomeState extends State<WritingHome> {
               if (_stats.isNotEmpty) ...[
                 const SectionTitle('Đã luyện gần đây'),
                 _charStrip(
-                    _stats.take(30).map((s) => s['char'] as String).toList(),
-                    scores: {
-                      for (final s in _stats)
-                        s['char'] as String: s['best'] as int
-                    }),
+                  _stats.take(30).map((s) => s['char'] as String).toList(),
+                  scores: {
+                    for (final s in _stats)
+                      s['char'] as String: s['best'] as int
+                  },
+                  attempts: {
+                    for (final s in _stats)
+                      s['char'] as String: (s['attempts'] as int?) ?? 1
+                  },
+                ),
               ],
             ],
           ),
@@ -369,8 +399,30 @@ class _WritingHomeState extends State<WritingHome> {
     );
   }
 
-  Widget _charStrip(List<String> chars,
-      {String? title, Map<String, int>? scores}) {
+  Widget _statItem(String val, String label, Color color) => Column(
+        children: [
+          Text(
+            val,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 11, color: AppColors.muted),
+          ),
+        ],
+      );
+
+  Widget _charStrip(
+    List<String> chars, {
+    String? title,
+    Map<String, int>? scores,
+    Map<String, int>? attempts,
+  }) {
     return SizedBox(
       height: 76,
       child: ListView.separated(
@@ -380,6 +432,7 @@ class _WritingHomeState extends State<WritingHome> {
         itemBuilder: (_, i) {
           final c = chars[i];
           final sc = scores?[c];
+          final att = attempts?[c];
           return InkWell(
             borderRadius: BorderRadius.circular(14),
             onTap: () => title != null
@@ -395,13 +448,23 @@ class _WritingHomeState extends State<WritingHome> {
                     child: Text(c,
                         style: const TextStyle(
                             fontSize: 32, color: AppColors.ink))),
+                if (att != null && att > 0)
+                  Positioned(
+                    left: 5,
+                    top: 3,
+                    child: Text('${att}x',
+                        style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.userInk)),
+                  ),
                 if (sc != null)
                   Positioned(
                     right: 4,
                     bottom: 2,
-                    child: Text('$sc',
+                    child: Text('$scđ',
                         style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 10,
                             fontWeight: FontWeight.w800,
                             color:
                                 sc >= 70 ? AppColors.hint : AppColors.error)),
