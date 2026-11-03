@@ -1,11 +1,11 @@
 {
-    "name": "hanzi_app",
-    "short_name": "hanzi_app",
+    "name": "Hán Tự — Học tiếng Trung Offline",
+    "short_name": "Hán Tự",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#12100F",
+    "theme_color": "#12100F",
+    "description": "Từ điển Trung-Việt, Luyện viết theo nét, Flashcard SRS, Kiểm tra & Quét OCR.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -112,7 +112,17 @@ class DictDb {
           [match],
         );
         _mergeInto(result, fts.map(Word.fromRow));
-      } catch (_) {/* malformed FTS query: ignore */}
+      } catch (_) {
+        // Fallback when SQLite engine (e.g. sql.js WASM) wasn't compiled with FTS5
+        final phrase = tokens.join(' ');
+        final likeRows = await _db.rawQuery(
+          'SELECT $_wordCols FROM words WHERE id IN '
+          '(SELECT id FROM mean_fts_content WHERE c0 LIKE ? LIMIT 300) '
+          'ORDER BY rank IS NULL, rank LIMIT 30',
+          ['%$phrase%'],
+        );
+        _mergeInto(result, likeRows.map(Word.fromRow));
+      }
     }
     return result.take(limit).toList();
   }

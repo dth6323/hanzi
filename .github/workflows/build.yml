@@ -1,13 +1,18 @@
-name: Build iOS IPA & Android APK
+name: Build & Publish (iOS IPA, Android APK, Web PWA)
 
 on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build-ios:
-    name: Build Unsigned iOS (.ipa) on macOS
+    name: Build iOS (.ipa)
     runs-on: macos-14
     steps:
       - name: Checkout repository
@@ -17,7 +22,6 @@ jobs:
         run: |
           mkdir -p app/assets/db
           gzip -d -c vi_full.db.gz > app/assets/db/vi_full.db
-          ls -lh app/assets/db/vi_full.db
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -25,33 +29,28 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install dependencies & run tests
-        working-directory: app
-        run: |
-          flutter pub get
-          flutter analyze
-
       - name: Build iOS Release (No Codesign)
         working-directory: app
         run: |
+          flutter pub get
           flutter build ios --release --no-codesign
 
-      - name: Package Runner.app into Hanzi.ipa
+      - name: Package Runner.app into Hanzi-iOS.ipa
         working-directory: app/build/ios/iphoneos
         run: |
           mkdir -p Payload
           cp -r Runner.app Payload/
-          zip -r -9 Hanzi.ipa Payload
+          zip -r -9 Hanzi-iOS.ipa Payload
 
-      - name: Upload Hanzi.ipa Artifact
+      - name: Upload Hanzi-iOS.ipa Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Hanzi-iOS-IPA
-          path: app/build/ios/iphoneos/Hanzi.ipa
+          path: app/build/ios/iphoneos/Hanzi-iOS.ipa
           retention-days: 30
 
   build-android:
-    name: Build Android Release (.apk)
+    name: Build Android (.apk)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -79,10 +78,74 @@ jobs:
         run: |
           flutter pub get
           flutter build apk --release
+          cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/Hanzi-Android.apk
 
-      - name: Upload Hanzi.apk Artifact
+      - name: Upload Hanzi-Android.apk Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Hanzi-Android-APK
-          path: app/build/app/outputs/flutter-apk/app-release.apk
+          path: app/build/app/outputs/flutter-apk/Hanzi-Android.apk
           retention-days: 30
+
+  build-web-pwa:
+    name: Build & Deploy iOS/Android Web App (PWA)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Build Web PWA with bundled vi_full.db.gz
+        working-directory: app
+        run: |
+          mkdir -p assets/db
+          touch assets/db/vi_full.db
+          flutter pub get
+          flutter build web --release --base-href "/hanzi/"
+          cp ../vi_full.db.gz build/web/vi_full.db.gz
+
+      - name: Deploy to GitHub Pages (gh-pages branch)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./app/build/web
+          force_orphan: true
+
+  publish-release:
+    name: Publish Direct Download Release (.apk & .ipa)
+    needs: [build-ios, build-android]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download iOS IPA
+        uses: actions/download-artifact@v4
+        with:
+          name: Hanzi-iOS-IPA
+          path: dist
+
+      - name: Download Android APK
+        uses: actions/download-artifact@v4
+        with:
+          name: Hanzi-Android-APK
+          path: dist
+
+      - name: Create / Update Latest GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "Hán Tự v1.0.0 — Bản cài đặt Android (.apk) & iOS (.ipa)"
+          body: |
+            ## 📲 Tải về & Cài đặt trực tiếp
+
+            - **Android (`Hanzi-Android.apk`)**: Bấm tải về trên điện thoại Android và mở file để cài đặt ngay.
+            - **iPhone / iPad (`Hanzi-iOS.ipa`)**: File IPA dành cho cài đặt qua Feather / ESign / TrollStore / Sideloadly.
+            - **Web App cài thẳng không cần cáp (iPhone Safari / Android Chrome)**: Mở **https://dth6323.github.io/hanzi/** → bấm **Chia sẻ** → **Thêm vào Màn hình chính (Add to Home Screen)**.
+          files: |
+            dist/Hanzi-Android.apk
+            dist/Hanzi-iOS.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
