@@ -1,0 +1,88 @@
+name: Build iOS IPA & Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: Build Unsigned iOS (.ipa) on macOS
+    runs-on: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Decompress bundled dictionary DB
+        run: |
+          mkdir -p app/assets/db
+          gzip -d -c vi_full.db.gz > app/assets/db/vi_full.db
+          ls -lh app/assets/db/vi_full.db
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies & run tests
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter analyze
+
+      - name: Build iOS Release (No Codesign)
+        working-directory: app
+        run: |
+          flutter build ios --release --no-codesign
+
+      - name: Package Runner.app into Hanzi.ipa
+        working-directory: app/build/ios/iphoneos
+        run: |
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r -9 Hanzi.ipa Payload
+
+      - name: Upload Hanzi.ipa Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hanzi-iOS-IPA
+          path: app/build/ios/iphoneos/Hanzi.ipa
+          retention-days: 30
+
+  build-android:
+    name: Build Android Release (.apk)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Decompress bundled dictionary DB
+        run: |
+          mkdir -p app/assets/db
+          gzip -d -c vi_full.db.gz > app/assets/db/vi_full.db
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Build Android APK
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter build apk --release
+
+      - name: Upload Hanzi.apk Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hanzi-Android-APK
+          path: app/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
