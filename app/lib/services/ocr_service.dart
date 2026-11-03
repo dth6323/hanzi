@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../data/db_bridge.dart';
@@ -13,8 +14,9 @@ export 'ocr_web_stub.dart' show OcrCaptureResult;
 
 /// Cross-platform Chinese OCR service:
 /// - Android: Google ML Kit Chinese Text Recognition V2 (Offline)
-/// - iOS: Apple Vision VNRecognizeTextRequest zh-Hans/zh-Hant (Offline)
-/// - Desktop/Web preview: Screen region snipping (`slurp`+`grim`) & image upload
+/// - iOS Native: Apple Vision VNRecognizeTextRequest zh-Hans/zh-Hant (Offline)
+/// - iOS/Android Web PWA: Native HTML5 Camera capture (`capture="environment"`) + Tesseract.js
+/// - Linux Desktop preview: Screen region snipping (`slurp`+`grim`) & image upload
 class OcrService {
   OcrService._();
   static final OcrService instance = OcrService._();
@@ -22,8 +24,10 @@ class OcrService {
   static const _channel = MethodChannel('com.hadz.hanzi_app/ocr');
 
   Future<OcrCaptureResult?> scanFromCamera() async {
+    if (kIsWeb) {
+      return pickWebImageAndOcr(useCamera: true);
+    }
     if (useHttpBridge) {
-      // On desktop preview, camera button triggers interactive screen region snip!
       return captureScreenRegion();
     }
     final res = await _channel.invokeMapMethod<String, dynamic>('scanCamera');
@@ -35,8 +39,8 @@ class OcrService {
   }
 
   Future<OcrCaptureResult?> scanFromGallery() async {
-    if (useHttpBridge) {
-      return pickWebImageAndOcr();
+    if (kIsWeb || useHttpBridge) {
+      return pickWebImageAndOcr(useCamera: false);
     }
     final res = await _channel.invokeMapMethod<String, dynamic>('scanGallery');
     if (res == null) return null;
@@ -46,8 +50,7 @@ class OcrService {
     );
   }
 
-  /// Captures a rectangular region of the screen via the local bridge (`slurp` + `grim`)
-  /// and runs Chinese OCR on it.
+  /// Captures a rectangular region of the Linux desktop screen via the local bridge.
   Future<OcrCaptureResult?> captureScreenRegion() async {
     final resp = await postJson('http://127.0.0.1:43821/screenshot', '{}');
     final map = jsonDecode(resp) as Map<String, dynamic>;

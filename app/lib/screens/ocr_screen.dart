@@ -1,8 +1,6 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../data/db_bridge.dart';
 import '../data/dict_db.dart';
 import '../data/models.dart';
 import '../data/text_utils.dart';
@@ -89,6 +87,8 @@ class _OcrScreenState extends State<OcrScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isLinuxDesktop =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.linux;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quét ảnh & Tách từ OCR'),
@@ -112,7 +112,7 @@ class _OcrScreenState extends State<OcrScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  useHttpBridge
+                  isLinuxDesktop
                       ? 'Bấm "Chụp vùng màn hình" rồi kéo chuột khoanh vùng chữ Trung trên màn hình, hoặc chọn file ảnh.'
                       : 'Chụp trực tiếp từ Camera hoặc chọn ảnh / ảnh chụp màn hình trong máy.',
                   style: const TextStyle(color: AppColors.muted, fontSize: 12),
@@ -127,14 +127,14 @@ class _OcrScreenState extends State<OcrScreen> {
                           ? null
                           : () => _runSource(
                                 OcrService.instance.scanFromCamera,
-                                useHttpBridge
+                                isLinuxDesktop
                                     ? 'Hãy dùng chuột khoanh vùng màn hình cần quét…'
                                     : 'Đang mở Camera & nhận diện chữ Hán…',
                               ),
-                      icon: Icon(useHttpBridge
+                      icon: Icon(isLinuxDesktop
                           ? Icons.crop_free_rounded
                           : Icons.camera_alt_rounded),
-                      label: Text(useHttpBridge
+                      label: Text(isLinuxDesktop
                           ? 'Chụp vùng màn hình'
                           : 'Chụp Camera'),
                     ),

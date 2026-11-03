@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../data/dict_db.dart';
 import '../data/text_utils.dart';
+import 'speech_web_stub.dart'
+    if (dart.library.html) 'speech_web_impl.dart';
 
 enum ToneMatch { exact, wrongTone, wrong }
 
@@ -52,11 +55,19 @@ class SpeechScorer {
 
   /// Starts native zh-CN speech recognition and resolves with the recognized text.
   Future<String> listen() async {
+    if (kIsWeb) {
+      final webFut = webListenSpeech();
+      if (webFut != null) return await webFut;
+    }
     final text = await _channel.invokeMethod<String>('listen');
     return (text ?? '').trim();
   }
 
   Future<void> stop() async {
+    if (kIsWeb) {
+      webStopSpeech();
+      return;
+    }
     try {
       await _channel.invokeMethod<void>('stop');
     } catch (_) {}

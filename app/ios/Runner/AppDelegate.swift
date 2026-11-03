@@ -61,16 +61,54 @@ import Vision
     }
   }
 
-  private func presentImagePicker(source: UIImagePickerController.SourceType, result: @escaping FlutterResult) {
-    guard UIImagePickerController.isSourceTypeAvailable(source),
-          let rootVC = window?.rootViewController else {
-      result(FlutterError(code: "UNAVAILABLE", message: "Thiết bị không hỗ trợ nguồn ảnh này", details: nil))
-      return
+  /// Resolves the active root view controller across both UIScene (iOS 13+) and legacy window setups.
+  private func activeRootViewController() -> UIViewController? {
+    for scene in UIApplication.shared.connectedScenes {
+      if let windowScene = scene as? UIWindowScene {
+        for w in windowScene.windows where w.isKeyWindow {
+          var vc = w.rootViewController
+          while let presented = vc?.presentedViewController {
+            vc = presented
+          }
+          if vc != nil { return vc }
+        }
+        if let first = windowScene.windows.first?.rootViewController {
+          return first
+        }
+      }
     }
+    return window?.rootViewController
+  }
+
+  private func presentImagePicker(source: UIImagePickerController.SourceType, result: @escaping FlutterResult) {
+    DispatchQueue.main.async {
+      guard UIImagePickerController.isSourceTypeAvailable(source),
+            let rootVC = self.activeRootViewController() else {
+        result(FlutterError(code: "UNAVAILABLE", message: "Thiết bị không hỗ trợ hoặc chưa cấp quyền Camera/Ảnh", details: nil))
+        return
+      }
+      if source == .camera {
+        AVCaptureDevice.requestAccess(for: .video) { granted in
+          DispatchQueue.main.async {
+            if !granted {
+              result(FlutterError(code: "PERMISSION", message: "Vui lòng cấp quyền Camera trong Cài đặt iPhone", details: nil))
+              return
+            }
+            self.showPicker(source: source, rootVC: rootVC, result: result)
+          }
+        }
+      } else {
+        self.showPicker(source: source, rootVC: rootVC, result: result)
+      }
+    }
+  }
+
+  private func showPicker(source: UIImagePickerController.SourceType, rootVC: UIViewController, result: @escaping FlutterResult) {
     pendingOcrResult = result
     let picker = UIImagePickerController()
     picker.sourceType = source
     picker.delegate = self
+    picker.modalPresentationStyle = .fullScreen
     rootVC.present(picker, animated: true)
   }
 
@@ -90,20 +128,22 @@ import Vision
       return
     }
 
+    let jpegData = image.jpegData(compressionQuality: 0.85)
     let request = VNRecognizeTextRequest { req, err in
-      if let err = err {
-        res(FlutterError(code: "OCR_ERROR", message: err.localizedDescription, details: nil))
-        return
+      DispatchQueue.main.async {
+        if let err = err {
+          res(FlutterError(code: "OCR_ERROR", message: err.localizedDescription, details: nil))
+          return
+        }
+        let observations = req.results as? [VNRecognizedTextObservation] ?? []
+        let lines = observations.compactMap { $0.topCandidates(1).first?.string }
+        let text = lines.joined(separator: "\n")
+        var payload: [String: Any] = ["text": text]
+        if let jpegData = jpegData {
+          payload["image"] = FlutterStandardTypedData(bytes: jpegData)
+        }
+        res(payload)
       }
-      let observations = req.results as? [VNRecognizedTextObservation] ?? []
-      let lines = observations.compactMap { $0.topCandidates(1).first?.string }
-      let text = lines.joined(separator: "\n")
-      let jpegData = image.jpegData(compressionQuality: 0.85)
-      var payload: [String: Any] = ["text": text]
-      if let jpegData = jpegData {
-        payload["image"] = FlutterStandardTypedData(bytes: jpegData)
-      }
-      res(payload)
     }
     request.recognitionLevel = .accurate
     request.recognitionLanguages = ["zh-Hans", "zh-Hant", "en-US"]
@@ -122,13 +162,21 @@ import Vision
   }
 
   private func startListening(result: @escaping FlutterResult) {
-    SFSpeechRecognizer.requestAuthorization { status in
+    AVAudioSession.sharedInstance().requestRecordPermission { micGranted in
       DispatchQueue.main.async {
-        guard status == .authorized else {
-          result(FlutterError(code: "PERMISSION", message: "Chưa cấp quyền nhận diện giọng nói", details: nil))
+        guard micGranted else {
+          result(FlutterError(code: "PERMISSION", message: "Chưa cấp quyền Micro trong Cài đặt iPhone", details: nil))
           return
         }
-        self.beginRecording(result: result)
+        SFSpeechRecognizer.requestAuthorization { status in
+          DispatchQueue.main.async {
+            guard status == .authorized else {
+              result(FlutterError(code: "PERMISSION", message: "Chưa cấp quyền Nhận diện giọng nói trong Cài đặt iPhone", details: nil))
+              return
+            }
+            self.beginRecording(result: result)
+          }
+        }
       }
     }
   }
@@ -141,7 +189,7 @@ import Vision
 
     let audioSession = AVAudioSession.sharedInstance()
     do {
-      try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+      try audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth])
       try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
     } catch {
       pendingResult = nil
@@ -156,9 +204,7 @@ import Vision
       return
     }
     recognitionRequest.shouldReportPartialResults = true
-    if #available(iOS 13, *), speechRecognizer?.supportsOnDeviceRecognition == true {
-      recognitionRequest.requiresOnDeviceRecognition = true
-    }
+    // Do not force requiresOnDeviceRecognition=true so iOS works even when the offline Chinese dictation model isn't downloaded yet
 
     let inputNode = audioEngine.inputNode
     recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) { [weak self] res, err in
@@ -213,6 +259,8 @@ import Vision
     }
     recognitionRequest = nil
     recognitionTask = nil
+    // Restore audio session so flutter_tts can play loud through speaker afterward
+    try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
     r(latestTranscript)
   }
 }

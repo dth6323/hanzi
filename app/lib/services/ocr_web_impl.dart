@@ -9,9 +9,12 @@ import 'ocr_web_stub.dart';
 
 export 'ocr_web_stub.dart' show OcrCaptureResult;
 
-Future<OcrCaptureResult?> pickWebImageAndOcr() async {
+Future<OcrCaptureResult?> pickWebImageAndOcr({bool useCamera = false}) async {
   final completer = Completer<Uint8List?>();
   final input = html.FileUploadInputElement()..accept = 'image/*';
+  if (useCamera) {
+    input.setAttribute('capture', 'environment');
+  }
   input.onChange.listen((_) {
     final files = input.files;
     if (files == null || files.isEmpty) {

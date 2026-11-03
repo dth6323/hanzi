@@ -6,6 +6,7 @@ class OcrCaptureResult {
   const OcrCaptureResult({required this.text, this.imageBytes});
 }
 
-Future<OcrCaptureResult?> pickWebImageAndOcr() async => null;
+Future<OcrCaptureResult?> pickWebImageAndOcr({bool useCamera = false}) async =>
+    null;
 
 Future<OcrCaptureResult?> runBrowserOcrOnBytes(Uint8List bytes) async => null;

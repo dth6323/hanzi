@@ -130,6 +130,64 @@
       } catch (_) {}
       return false;
     };
+
+    window.__hanziActiveRec = null;
+
+    window.__hanziWebListen = function() {
+      return new Promise((resolve, reject) => {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) {
+          reject('Trình duyệt chưa hỗ trợ Web Speech API');
+          return;
+        }
+        try {
+          if (window.__hanziActiveRec) {
+            window.__hanziActiveRec.abort();
+          }
+          const rec = new SR();
+          window.__hanziActiveRec = rec;
+          rec.lang = 'zh-CN';
+          rec.continuous = false;
+          rec.interimResults = true;
+          let latest = '';
+          let settled = false;
+          rec.onresult = (e) => {
+            let txt = '';
+            for (let i = 0; i < e.results.length; i++) {
+              txt += e.results[i][0].transcript;
+            }
+            if (txt) latest = txt;
+          };
+          rec.onerror = (e) => {
+            if (!settled) {
+              settled = true;
+              if (latest) resolve(latest);
+              else reject('Lỗi Micro: ' + (e.error || 'không nhận được âm thanh'));
+            }
+          };
+          rec.onend = () => {
+            if (!settled) {
+              settled = true;
+              resolve(latest);
+            }
+          };
+          rec.start();
+          setTimeout(() => {
+            try { rec.stop(); } catch (_) {}
+          }, 5000);
+        } catch (err) {
+          reject(String(err));
+        }
+      });
+    };
+
+    window.__hanziWebStopListen = function() {
+      try {
+        if (window.__hanziActiveRec) {
+          window.__hanziActiveRec.stop();
+        }
+      } catch (_) {}
+    };
   </script>
 </head>
 <body>
