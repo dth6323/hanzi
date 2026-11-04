@@ -44,6 +44,7 @@ ThemeData buildTheme() {
       surface: AppColors.surface,
     ),
     scaffoldBackgroundColor: AppColors.bg,
+    canvasColor: AppColors.bg,
   );
   return base.copyWith(
     appBarTheme: const AppBarTheme(

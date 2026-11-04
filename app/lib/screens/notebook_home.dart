@@ -72,7 +72,7 @@ class NotebookHomeState extends State<NotebookHome> {
     if (!mounted) return;
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => FlashcardScreen(cards: cards)),
+      appRoute((_) => FlashcardScreen(cards: cards)),
     );
     refresh();
   }

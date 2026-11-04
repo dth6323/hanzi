@@ -241,7 +241,7 @@ class _OcrScreenState extends State<OcrScreen> {
                     borderRadius: BorderRadius.circular(12),
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => CharScreen(char: c)),
+                      appRoute((_) => CharScreen(char: c)),
                     ),
                     child: Container(
                       width: 52,

@@ -104,7 +104,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         onPressed: () async {
                           await Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const OcrScreen()),
+                            appRoute((_) => const OcrScreen()),
                           );
                           _loadHistory();
                         },

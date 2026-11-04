@@ -70,11 +70,8 @@ class _CharScreenState extends State<CharScreen> {
                     FilledButton.icon(
                       icon: const Icon(Icons.draw_rounded),
                       label: const Text('Luyện viết'),
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) =>
-                                  PracticeScreen(chars: [c.char]))),
+                      onPressed: () => Navigator.push(context,
+                          appRoute((_) => PracticeScreen(chars: [c.char]))),
                     ),
                   ],
                 ),
@@ -133,9 +130,7 @@ class _CharScreenState extends State<CharScreen> {
                     ActionChip(
                       label: Text(comp, style: const TextStyle(fontSize: 20)),
                       onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => CharScreen(char: comp))),
+                          context, appRoute((_) => CharScreen(char: comp))),
                     ),
                 ]),
               ],

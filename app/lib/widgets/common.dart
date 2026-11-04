@@ -1,9 +1,22 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../data/models.dart';
 import '../screens/word_screen.dart';
 import '../services/speaker.dart';
 import '../theme.dart';
+
+/// Creates an iOS-native page route with [allowSnapshotting] explicitly set to false.
+/// On Flutter with Impeller (iOS), route snapshotting during interactive edge-swipe
+/// causes a fence timeout / dropped surface buffer, exposing the native window as a white flash.
+/// Disabling snapshotting keeps both routes live on GPU at 60/120fps with zero white screen or delay.
+PageRoute<T> appRoute<T>(WidgetBuilder builder, {RouteSettings? settings}) {
+  return CupertinoPageRoute<T>(
+    builder: builder,
+    settings: settings,
+    allowSnapshotting: false,
+  );
+}
 
 class SpeakButton extends StatelessWidget {
   final String text;
@@ -57,8 +70,7 @@ class WordTile extends StatelessWidget {
         // search field when this route is popped, re-opening the keyboard and
         // relayouting the whole home screen during the back transition.
         FocusManager.instance.primaryFocus?.unfocus();
-        Navigator.push(context,
-            MaterialPageRoute(builder: (_) => WordScreen(wordId: id)));
+        Navigator.push(context, appRoute((_) => WordScreen(wordId: id)));
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),

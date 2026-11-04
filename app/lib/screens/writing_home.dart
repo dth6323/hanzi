@@ -86,9 +86,7 @@ class _WritingHomeState extends State<WritingHome> {
     if (chars.isEmpty) return;
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => PracticeScreen(chars: chars, title: title),
-      ),
+      appRoute((_) => PracticeScreen(chars: chars, title: title)),
     );
     _refresh();
   }
@@ -99,9 +97,7 @@ class _WritingHomeState extends State<WritingHome> {
   }) async {
     final picked = await Navigator.push<List<String>>(
       context,
-      MaterialPageRoute(
-        builder: (_) => _WordPickerScreen(title: title, future: future),
-      ),
+      appRoute((_) => _WordPickerScreen(title: title, future: future)),
     );
     if (picked != null && picked.isNotEmpty) {
       _open(picked, title: title);

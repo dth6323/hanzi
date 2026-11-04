@@ -119,8 +119,8 @@ class _WordScreenState extends State<WordScreen> {
               for (final c in chars)
                 InkWell(
                   borderRadius: BorderRadius.circular(14),
-                  onTap: () => Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => CharScreen(char: c))),
+                  onTap: () => Navigator.push(
+                      context, appRoute((_) => CharScreen(char: c))),
                   child: Container(
                     width: 64,
                     height: 64,
@@ -156,11 +156,8 @@ class _WordScreenState extends State<WordScreen> {
                             final target =
                                 await DictDb.instance.wordBySimp(t);
                             if (target != null && mounted) {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) =>
-                                          WordScreen(wordId: target.id)));
+                              Navigator.push(context,
+                                  appRoute((_) => WordScreen(wordId: target.id)));
                             }
                           },
                   ),

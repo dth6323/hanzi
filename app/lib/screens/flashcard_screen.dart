@@ -202,9 +202,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
                         TextButton.icon(
                           onPressed: () => Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (_) => WordScreen(wordId: c.wordId),
-                            ),
+                            appRoute((_) => WordScreen(wordId: c.wordId)),
                           ),
                           icon: const Icon(Icons.open_in_new_rounded, size: 18),
                           label: const Text('Xem chi tiết từ & ví dụ'),

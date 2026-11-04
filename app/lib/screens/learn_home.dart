@@ -56,9 +56,7 @@ class LearnHome extends StatelessWidget {
 
 void _openWords(BuildContext context, String title, Future<List<Word>> f) {
   Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (_) => _WordListScreen(title: title, future: f)));
+      context, appRoute((_) => _WordListScreen(title: title, future: f)));
 }
 
 class _WordListScreen extends StatelessWidget {
@@ -102,10 +100,8 @@ class _WordListScreen extends StatelessWidget {
                     if (context.mounted) {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              FlashcardScreen(cards: cards, title: title),
-                        ),
+                        appRoute((_) =>
+                            FlashcardScreen(cards: cards, title: title)),
                       );
                     }
                   },
@@ -164,10 +160,8 @@ class _HskTab extends StatelessWidget {
                   icon: const Icon(Icons.quiz_outlined, color: AppColors.gold),
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          QuizScreen(type: QuizType.meaning, hskLevel: lv),
-                    ),
+                    appRoute((_) =>
+                        QuizScreen(type: QuizType.meaning, hskLevel: lv)),
                   ),
                 ),
                 const Icon(Icons.chevron_right_rounded),
@@ -279,9 +273,7 @@ class _GrammarTabState extends State<_GrammarTab>
                         style: const TextStyle(fontWeight: FontWeight.w700)),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => _GrammarList(level: lv))),
+                        context, appRoute((_) => _GrammarList(level: lv))),
                   ),
                 ),
               ),
@@ -324,8 +316,8 @@ class _GrammarListState extends State<_GrammarList> {
                     ? null
                     : Text(g.keywords,
                         style: const TextStyle(color: AppColors.gold)),
-                onTap: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => _GrammarDetail(g))),
+                onTap: () => Navigator.push(
+                    context, appRoute((_) => _GrammarDetail(g))),
               );
             },
           );
@@ -404,9 +396,7 @@ class _QuizTabState extends State<_QuizTab>
   Future<void> _startQuiz(QuizType t) async {
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => QuizScreen(type: t, hskLevel: _hsk),
-      ),
+      appRoute((_) => QuizScreen(type: t, hskLevel: _hsk)),
     );
     _loadHistory();
   }
