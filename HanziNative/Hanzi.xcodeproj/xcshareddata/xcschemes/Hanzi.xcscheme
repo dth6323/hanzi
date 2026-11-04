@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CD31D49F4394404B87BDE962"
+               BlueprintIdentifier = "0B79671D1CE0429D8690A4BB"
                BuildableName = "Hanzi.app"
                BlueprintName = "Hanzi"
                ReferencedContainer = "container:Hanzi.xcodeproj">
@@ -36,7 +36,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "CD31D49F4394404B87BDE962"
+            BlueprintIdentifier = "0B79671D1CE0429D8690A4BB"
             BuildableName = "Hanzi.app"
             BlueprintName = "Hanzi"
             ReferencedContainer = "container:Hanzi.xcodeproj">

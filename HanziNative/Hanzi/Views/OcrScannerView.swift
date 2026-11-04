@@ -159,7 +159,7 @@ struct OcrScannerView: View {
         OcrService.shared.recognizeChinese(image: image) { text in
             DispatchQueue.main.async {
                 self.isProcessing = false
-                guard let text = text, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                     self.errorMessage = "Không tìm thấy văn bản tiếng Trung rõ ràng trong ảnh"
                     return
                 }

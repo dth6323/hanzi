@@ -7,144 +7,127 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D652EE79C8CF4D79B3C9114C /* HanziApp.swift in sources */ = {isa = PBXBuildFile; fileRef = 004F92AD8FEB455B8378B00A /* HanziApp.swift */; };
-		3E314A0C1834475AA5B0D392 /* Theme.swift in sources */ = {isa = PBXBuildFile; fileRef = 4A86B76E9F2F46C797027B75 /* Theme.swift */; };
-		32B4935774B04F8EBEC108FD /* Assets.xcassets in resources */ = {isa = PBXBuildFile; fileRef = 39D20C16E33043B7840B36C7 /* Assets.xcassets */; };
-		A3DE81F304AD4390962AC672 /* Models.swift in sources */ = {isa = PBXBuildFile; fileRef = 1059DE4E531F4857A76ACA0F /* Models.swift */; };
-		AD11C4505ED44082919D776E /* DictDatabase.swift in sources */ = {isa = PBXBuildFile; fileRef = 41AAD17ED9D74FFBA60CC277 /* DictDatabase.swift */; };
-		30BF3136BA8E46288E06597D /* UserDatabase.swift in sources */ = {isa = PBXBuildFile; fileRef = 038F9EEBDF8C4B90883B6E5C /* UserDatabase.swift */; };
-		E7328B5BC60A4B3BB579BAEE /* TextUtils.swift in sources */ = {isa = PBXBuildFile; fileRef = 1CF0A25EF1964A1EAF030A3D /* TextUtils.swift */; };
-		482116E485DE4307B7F61138 /* Speaker.swift in sources */ = {isa = PBXBuildFile; fileRef = 7869A8D4B00C40258A0B3684 /* Speaker.swift */; };
-		5C3FD0E138F649CCA672DDE3 /* OcrService.swift in sources */ = {isa = PBXBuildFile; fileRef = A17E33D245654434A71D3D66 /* OcrService.swift */; };
-		343471F5967D41B09A14675D /* StrokeMatcher.swift in sources */ = {isa = PBXBuildFile; fileRef = 0281BE2A67F94BB1842DE115 /* StrokeMatcher.swift */; };
-		086C4BCEA05B4DE98512AB99 /* HanziCanvasView.swift in sources */ = {isa = PBXBuildFile; fileRef = B11A4EEBE29F4A3A9F7C3B76 /* HanziCanvasView.swift */; };
-		1D97D80F56034F80B975C00C /* Components.swift in sources */ = {isa = PBXBuildFile; fileRef = C901D62D9871446EA235B118 /* Components.swift */; };
-		704150F0E68F4EC884761488 /* SearchScreenView.swift in sources */ = {isa = PBXBuildFile; fileRef = 26404F64E70D4A929C374E02 /* SearchScreenView.swift */; };
-		4F5FB147F7244B7D8DA3EA3B /* WordDetailView.swift in sources */ = {isa = PBXBuildFile; fileRef = A5D68100BE424CE5B00D0DCF /* WordDetailView.swift */; };
-		DF76062F812440B9A075C9A4 /* CharDetailView.swift in sources */ = {isa = PBXBuildFile; fileRef = BAEE60B20B8D455BA3B38E69 /* CharDetailView.swift */; };
-		48A56CCD7AD24037B12A567F /* PracticeView.swift in sources */ = {isa = PBXBuildFile; fileRef = EA251A7718CF41E9A8C00348 /* PracticeView.swift */; };
-		3E5CDEAAC0E14CF6BE224E84 /* WritingHomeView.swift in sources */ = {isa = PBXBuildFile; fileRef = 1D94B7CD24F048AA835F3227 /* WritingHomeView.swift */; };
-		948A29EE97D04B698293DE8D /* FlashcardView.swift in sources */ = {isa = PBXBuildFile; fileRef = D7DE412CB1384B21B50B5366 /* FlashcardView.swift */; };
-		20A228AEC328491EBC20F2F0 /* NotebookView.swift in sources */ = {isa = PBXBuildFile; fileRef = 0EF7F524BD794689BBBF1627 /* NotebookView.swift */; };
-		0F34D6C2282C49BE913DE260 /* QuizView.swift in sources */ = {isa = PBXBuildFile; fileRef = 8E88B942CC4F479E854577E0 /* QuizView.swift */; };
-		2EF1E03EC02D49A1A6EA2156 /* LearnHomeView.swift in sources */ = {isa = PBXBuildFile; fileRef = 0B29EA209C8645A9ADDEF67B /* LearnHomeView.swift */; };
-		953E9592DAF4497A9BB39202 /* OcrScannerView.swift in sources */ = {isa = PBXBuildFile; fileRef = 8C129DA521034A959BDEA07C /* OcrScannerView.swift */; };
-		198A68057A0A4E8091AD1569 /* MainTabView.swift in sources */ = {isa = PBXBuildFile; fileRef = CCE18DE9BA324559A89ECF73 /* MainTabView.swift */; };
-		0C5376353FF84B26BD4B76E0 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 11BD40ADF2564A6C89E3A21F /* libsqlite3.tbd */; };
-		768D4EC58F824334AF46669F /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E860FA44B6EE4FEB92612E4C /* AVFoundation.framework */; };
-		CB69E6378B1F4EA1A260E33B /* Vision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49B91332845848658F62AA65 /* Vision.framework */; };
-		16FBFECE31654A6E9F4D5A3F /* Speech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A11CFCC2FB44D538CBC91E8 /* Speech.framework */; };
+		F0A4263937D64D38B53E9951 /* HanziApp.swift in sources */ = {isa = PBXBuildFile; fileRef = 97C034B5B97E45418637F6F1 /* HanziApp.swift */; };
+		984DE683E4C04D2C8E89EB2C /* Theme.swift in sources */ = {isa = PBXBuildFile; fileRef = 8D8EAEC0144E4E81A3CA16A0 /* Theme.swift */; };
+		20CC428AF6E6429AAA7A251B /* Assets.xcassets in resources */ = {isa = PBXBuildFile; fileRef = FAB7F7BA867645EFAD9F259D /* Assets.xcassets */; };
+		45781E5733E9434381F44D65 /* Models.swift in sources */ = {isa = PBXBuildFile; fileRef = A2D86431DB01420B8B269D49 /* Models.swift */; };
+		9C1C9CB7B73A46AF809539D5 /* DictDatabase.swift in sources */ = {isa = PBXBuildFile; fileRef = E330D8017A1D4BE29D763E9E /* DictDatabase.swift */; };
+		36B8572FBA67471C85E1350C /* UserDatabase.swift in sources */ = {isa = PBXBuildFile; fileRef = A740C4194D7D498BAADCF04A /* UserDatabase.swift */; };
+		405143F83BA54EA0A8A30012 /* TextUtils.swift in sources */ = {isa = PBXBuildFile; fileRef = 8C89B449E4634BC5B6F00893 /* TextUtils.swift */; };
+		9C4524F14A2A42C28F43B2F7 /* Speaker.swift in sources */ = {isa = PBXBuildFile; fileRef = 503687C9F0F94C868A128B38 /* Speaker.swift */; };
+		BA69D627A802470987FBAAF5 /* OcrService.swift in sources */ = {isa = PBXBuildFile; fileRef = 65C3D0A3C111407AA8C479FD /* OcrService.swift */; };
+		1063B817EF03474DB5DA3387 /* StrokeMatcher.swift in sources */ = {isa = PBXBuildFile; fileRef = BDBAF3A01A304F50A065D54F /* StrokeMatcher.swift */; };
+		B978D6FA75C3494DB785AAB1 /* HanziCanvasView.swift in sources */ = {isa = PBXBuildFile; fileRef = 0DDD413111D54815A4FE9392 /* HanziCanvasView.swift */; };
+		EF148023DABA4800A4B3E312 /* Components.swift in sources */ = {isa = PBXBuildFile; fileRef = 668897E8DF5340D39DC1796D /* Components.swift */; };
+		BDEFDEF6816F42DFBB4C0689 /* SearchScreenView.swift in sources */ = {isa = PBXBuildFile; fileRef = 169F8A9C47424908A1D5BA51 /* SearchScreenView.swift */; };
+		DE16A457E9994FE9813FA882 /* WordDetailView.swift in sources */ = {isa = PBXBuildFile; fileRef = 7334EB1FCDEF4144A7950976 /* WordDetailView.swift */; };
+		119387E532B54A9B993BADE6 /* CharDetailView.swift in sources */ = {isa = PBXBuildFile; fileRef = C534C8E400574B1D85525313 /* CharDetailView.swift */; };
+		2FF2C50759D441CC8F928911 /* PracticeView.swift in sources */ = {isa = PBXBuildFile; fileRef = 3BD2ABD7B9C64C8884FBEA71 /* PracticeView.swift */; };
+		401D559FD43B4556877F16FB /* WritingHomeView.swift in sources */ = {isa = PBXBuildFile; fileRef = 113040FBE0D545B596DC184C /* WritingHomeView.swift */; };
+		851982BBABC04E8BA0F4C72C /* FlashcardView.swift in sources */ = {isa = PBXBuildFile; fileRef = 606AD8ECDE304EE0B3898CA0 /* FlashcardView.swift */; };
+		7F30DFCCFAC94D16B3CEF05F /* NotebookView.swift in sources */ = {isa = PBXBuildFile; fileRef = DAB489ADBF7C452DA8D17079 /* NotebookView.swift */; };
+		239E654707454A03A5BD8D30 /* QuizView.swift in sources */ = {isa = PBXBuildFile; fileRef = B2A3C565FC5D424CA3833632 /* QuizView.swift */; };
+		96EC72C3B0774323BE346511 /* LearnHomeView.swift in sources */ = {isa = PBXBuildFile; fileRef = 47181C9F647B4EB1B15DA18B /* LearnHomeView.swift */; };
+		63A0BA3B19BB42B69D108F72 /* OcrScannerView.swift in sources */ = {isa = PBXBuildFile; fileRef = 1D37D49DE358442FB30ED0E8 /* OcrScannerView.swift */; };
+		AFFD72F336E9427D8016E682 /* MainTabView.swift in sources */ = {isa = PBXBuildFile; fileRef = 399B1D853AAB4FC792BECCB3 /* MainTabView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		442C730938E94F91BFAD3023 /* Hanzi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hanzi.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		004F92AD8FEB455B8378B00A /* HanziApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HanziApp.swift"; sourceTree = "<group>"; };
-		4A86B76E9F2F46C797027B75 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Theme.swift"; sourceTree = "<group>"; };
-		673ABA5DD2BA46F0997708A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info.plist"; sourceTree = "<group>"; };
-		39D20C16E33043B7840B36C7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Assets.xcassets"; sourceTree = "<group>"; };
-		1059DE4E531F4857A76ACA0F /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Models.swift"; sourceTree = "<group>"; };
-		41AAD17ED9D74FFBA60CC277 /* DictDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database/DictDatabase.swift"; sourceTree = "<group>"; };
-		038F9EEBDF8C4B90883B6E5C /* UserDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database/UserDatabase.swift"; sourceTree = "<group>"; };
-		1CF0A25EF1964A1EAF030A3D /* TextUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database/TextUtils.swift"; sourceTree = "<group>"; };
-		7869A8D4B00C40258A0B3684 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/Speaker.swift"; sourceTree = "<group>"; };
-		A17E33D245654434A71D3D66 /* OcrService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/OcrService.swift"; sourceTree = "<group>"; };
-		0281BE2A67F94BB1842DE115 /* StrokeMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Writing/StrokeMatcher.swift"; sourceTree = "<group>"; };
-		B11A4EEBE29F4A3A9F7C3B76 /* HanziCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Writing/HanziCanvasView.swift"; sourceTree = "<group>"; };
-		C901D62D9871446EA235B118 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Components.swift"; sourceTree = "<group>"; };
-		26404F64E70D4A929C374E02 /* SearchScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/SearchScreenView.swift"; sourceTree = "<group>"; };
-		A5D68100BE424CE5B00D0DCF /* WordDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/WordDetailView.swift"; sourceTree = "<group>"; };
-		BAEE60B20B8D455BA3B38E69 /* CharDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/CharDetailView.swift"; sourceTree = "<group>"; };
-		EA251A7718CF41E9A8C00348 /* PracticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/PracticeView.swift"; sourceTree = "<group>"; };
-		1D94B7CD24F048AA835F3227 /* WritingHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/WritingHomeView.swift"; sourceTree = "<group>"; };
-		D7DE412CB1384B21B50B5366 /* FlashcardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/FlashcardView.swift"; sourceTree = "<group>"; };
-		0EF7F524BD794689BBBF1627 /* NotebookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/NotebookView.swift"; sourceTree = "<group>"; };
-		8E88B942CC4F479E854577E0 /* QuizView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/QuizView.swift"; sourceTree = "<group>"; };
-		0B29EA209C8645A9ADDEF67B /* LearnHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/LearnHomeView.swift"; sourceTree = "<group>"; };
-		8C129DA521034A959BDEA07C /* OcrScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/OcrScannerView.swift"; sourceTree = "<group>"; };
-		CCE18DE9BA324559A89ECF73 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/MainTabView.swift"; sourceTree = "<group>"; };
-		11BD40ADF2564A6C89E3A21F /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "libsqlite3.tbd"; path = "System/Library/Frameworks/libsqlite3.tbd"; sourceTree = SDKROOT; };
-		E860FA44B6EE4FEB92612E4C /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "AVFoundation.framework"; path = "System/Library/Frameworks/AVFoundation.framework"; sourceTree = SDKROOT; };
-		49B91332845848658F62AA65 /* Vision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "Vision.framework"; path = "System/Library/Frameworks/Vision.framework"; sourceTree = SDKROOT; };
-		5A11CFCC2FB44D538CBC91E8 /* Speech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "Speech.framework"; path = "System/Library/Frameworks/Speech.framework"; sourceTree = SDKROOT; };
+		24C5E6B1754446DCAE37E025 /* Hanzi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hanzi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		97C034B5B97E45418637F6F1 /* HanziApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HanziApp.swift"; sourceTree = "<group>"; };
+		8D8EAEC0144E4E81A3CA16A0 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Theme.swift"; sourceTree = "<group>"; };
+		37983B92C5704DBD98E8BA3B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info.plist"; sourceTree = "<group>"; };
+		FAB7F7BA867645EFAD9F259D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Assets.xcassets"; sourceTree = "<group>"; };
+		A2D86431DB01420B8B269D49 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Models.swift"; sourceTree = "<group>"; };
+		E330D8017A1D4BE29D763E9E /* DictDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database/DictDatabase.swift"; sourceTree = "<group>"; };
+		A740C4194D7D498BAADCF04A /* UserDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database/UserDatabase.swift"; sourceTree = "<group>"; };
+		8C89B449E4634BC5B6F00893 /* TextUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database/TextUtils.swift"; sourceTree = "<group>"; };
+		503687C9F0F94C868A128B38 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/Speaker.swift"; sourceTree = "<group>"; };
+		65C3D0A3C111407AA8C479FD /* OcrService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/OcrService.swift"; sourceTree = "<group>"; };
+		BDBAF3A01A304F50A065D54F /* StrokeMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Writing/StrokeMatcher.swift"; sourceTree = "<group>"; };
+		0DDD413111D54815A4FE9392 /* HanziCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Writing/HanziCanvasView.swift"; sourceTree = "<group>"; };
+		668897E8DF5340D39DC1796D /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Components.swift"; sourceTree = "<group>"; };
+		169F8A9C47424908A1D5BA51 /* SearchScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/SearchScreenView.swift"; sourceTree = "<group>"; };
+		7334EB1FCDEF4144A7950976 /* WordDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/WordDetailView.swift"; sourceTree = "<group>"; };
+		C534C8E400574B1D85525313 /* CharDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/CharDetailView.swift"; sourceTree = "<group>"; };
+		3BD2ABD7B9C64C8884FBEA71 /* PracticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/PracticeView.swift"; sourceTree = "<group>"; };
+		113040FBE0D545B596DC184C /* WritingHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/WritingHomeView.swift"; sourceTree = "<group>"; };
+		606AD8ECDE304EE0B3898CA0 /* FlashcardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/FlashcardView.swift"; sourceTree = "<group>"; };
+		DAB489ADBF7C452DA8D17079 /* NotebookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/NotebookView.swift"; sourceTree = "<group>"; };
+		B2A3C565FC5D424CA3833632 /* QuizView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/QuizView.swift"; sourceTree = "<group>"; };
+		47181C9F647B4EB1B15DA18B /* LearnHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/LearnHomeView.swift"; sourceTree = "<group>"; };
+		1D37D49DE358442FB30ED0E8 /* OcrScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/OcrScannerView.swift"; sourceTree = "<group>"; };
+		399B1D853AAB4FC792BECCB3 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/MainTabView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		6202A57CC35843C488080E7E /* Frameworks */ = {
+		E1B90216F32D41ABBD838E8F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0C5376353FF84B26BD4B76E0 /* libsqlite3.tbd in Frameworks */,
-				768D4EC58F824334AF46669F /* AVFoundation.framework in Frameworks */,
-				CB69E6378B1F4EA1A260E33B /* Vision.framework in Frameworks */,
-				16FBFECE31654A6E9F4D5A3F /* Speech.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0576FBD023294659BFFAF20C = {
+		8F544911C3F846F6AD295D7A = {
 			isa = PBXGroup;
 			children = (
-				80F6E61E25794D5FBA3933F0 /* Products */,
-				14B1E22B3D3348279CDB5C4D /* Frameworks */,
-				004F92AD8FEB455B8378B00A /* HanziApp.swift */,
-				4A86B76E9F2F46C797027B75 /* Theme.swift */,
-				673ABA5DD2BA46F0997708A5 /* Info.plist */,
-				39D20C16E33043B7840B36C7 /* Assets.xcassets */,
-				1059DE4E531F4857A76ACA0F /* Models.swift */,
-				41AAD17ED9D74FFBA60CC277 /* DictDatabase.swift */,
-				038F9EEBDF8C4B90883B6E5C /* UserDatabase.swift */,
-				1CF0A25EF1964A1EAF030A3D /* TextUtils.swift */,
-				7869A8D4B00C40258A0B3684 /* Speaker.swift */,
-				A17E33D245654434A71D3D66 /* OcrService.swift */,
-				0281BE2A67F94BB1842DE115 /* StrokeMatcher.swift */,
-				B11A4EEBE29F4A3A9F7C3B76 /* HanziCanvasView.swift */,
-				C901D62D9871446EA235B118 /* Components.swift */,
-				26404F64E70D4A929C374E02 /* SearchScreenView.swift */,
-				A5D68100BE424CE5B00D0DCF /* WordDetailView.swift */,
-				BAEE60B20B8D455BA3B38E69 /* CharDetailView.swift */,
-				EA251A7718CF41E9A8C00348 /* PracticeView.swift */,
-				1D94B7CD24F048AA835F3227 /* WritingHomeView.swift */,
-				D7DE412CB1384B21B50B5366 /* FlashcardView.swift */,
-				0EF7F524BD794689BBBF1627 /* NotebookView.swift */,
-				8E88B942CC4F479E854577E0 /* QuizView.swift */,
-				0B29EA209C8645A9ADDEF67B /* LearnHomeView.swift */,
-				8C129DA521034A959BDEA07C /* OcrScannerView.swift */,
-				CCE18DE9BA324559A89ECF73 /* MainTabView.swift */,
+				952F8798935B434EB37FB772 /* Hanzi */,
+				57546CC08A424D7EB6BB88CF /* Products */,
 			);
 			sourceTree = "<group>";
-			path = Hanzi;
 		};
-		80F6E61E25794D5FBA3933F0 /* Products */ = {
+		952F8798935B434EB37FB772 /* Hanzi */ = {
 			isa = PBXGroup;
 			children = (
-				442C730938E94F91BFAD3023 /* Hanzi.app */,
+				97C034B5B97E45418637F6F1 /* HanziApp.swift */,
+				8D8EAEC0144E4E81A3CA16A0 /* Theme.swift */,
+				37983B92C5704DBD98E8BA3B /* Info.plist */,
+				FAB7F7BA867645EFAD9F259D /* Assets.xcassets */,
+				A2D86431DB01420B8B269D49 /* Models.swift */,
+				E330D8017A1D4BE29D763E9E /* DictDatabase.swift */,
+				A740C4194D7D498BAADCF04A /* UserDatabase.swift */,
+				8C89B449E4634BC5B6F00893 /* TextUtils.swift */,
+				503687C9F0F94C868A128B38 /* Speaker.swift */,
+				65C3D0A3C111407AA8C479FD /* OcrService.swift */,
+				BDBAF3A01A304F50A065D54F /* StrokeMatcher.swift */,
+				0DDD413111D54815A4FE9392 /* HanziCanvasView.swift */,
+				668897E8DF5340D39DC1796D /* Components.swift */,
+				169F8A9C47424908A1D5BA51 /* SearchScreenView.swift */,
+				7334EB1FCDEF4144A7950976 /* WordDetailView.swift */,
+				C534C8E400574B1D85525313 /* CharDetailView.swift */,
+				3BD2ABD7B9C64C8884FBEA71 /* PracticeView.swift */,
+				113040FBE0D545B596DC184C /* WritingHomeView.swift */,
+				606AD8ECDE304EE0B3898CA0 /* FlashcardView.swift */,
+				DAB489ADBF7C452DA8D17079 /* NotebookView.swift */,
+				B2A3C565FC5D424CA3833632 /* QuizView.swift */,
+				47181C9F647B4EB1B15DA18B /* LearnHomeView.swift */,
+				1D37D49DE358442FB30ED0E8 /* OcrScannerView.swift */,
+				399B1D853AAB4FC792BECCB3 /* MainTabView.swift */,
+			);
+			path = Hanzi;
+			sourceTree = "<group>";
+		};
+		57546CC08A424D7EB6BB88CF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				24C5E6B1754446DCAE37E025 /* Hanzi.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		14B1E22B3D3348279CDB5C4D /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				11BD40ADF2564A6C89E3A21F /* libsqlite3.tbd */,
-				E860FA44B6EE4FEB92612E4C /* AVFoundation.framework */,
-				49B91332845848658F62AA65 /* Vision.framework */,
-				5A11CFCC2FB44D538CBC91E8 /* Speech.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		CD31D49F4394404B87BDE962 /* Hanzi */ = {
+		0B79671D1CE0429D8690A4BB /* Hanzi */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8C66D374A05C43ACB88157E9 /* Build configuration list for PBXNativeTarget "Hanzi" */;
+			buildConfigurationList = A751EF4E863E46C290D56C9A /* Build configuration list for PBXNativeTarget "Hanzi" */;
 			buildPhases = (
-				A07AECA1613D4373BB4B987A /* Sources */,
-				6202A57CC35843C488080E7E /* Frameworks */,
-				9AD5A236084245C09757E39E /* Resources */,
+				D5CDC815A111407DAC1F18CC /* Sources */,
+				E1B90216F32D41ABBD838E8F /* Frameworks */,
+				4966D9BE49D84CBF9BB20D91 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -152,24 +135,24 @@
 			);
 			name = Hanzi;
 			productName = Hanzi;
-			productReference = 442C730938E94F91BFAD3023 /* Hanzi.app */;
+			productReference = 24C5E6B1754446DCAE37E025 /* Hanzi.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		EC0DB5EDF14B4003904E994F /* Project object */ = {
+		CF9AA4DE645349528102F930 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
-					CD31D49F4394404B87BDE962 = {
+					0B79671D1CE0429D8690A4BB = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
-			buildConfigurationList = B8E1A571B99144F0A2850FEC /* Build configuration list for PBXProject "Hanzi" */;
+			buildConfigurationList = FB4E10AAB4D74373A78B194F /* Build configuration list for PBXProject "Hanzi" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -177,61 +160,61 @@
 				en,
 				Base,
 			);
-			mainGroup = 0576FBD023294659BFFAF20C;
-			productRefGroup = 80F6E61E25794D5FBA3933F0 /* Products */;
+			mainGroup = 8F544911C3F846F6AD295D7A;
+			productRefGroup = 57546CC08A424D7EB6BB88CF /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				CD31D49F4394404B87BDE962 /* Hanzi */,
+				0B79671D1CE0429D8690A4BB /* Hanzi */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		9AD5A236084245C09757E39E /* Resources */ = {
+		4966D9BE49D84CBF9BB20D91 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				32B4935774B04F8EBEC108FD /* Assets.xcassets in Resources */,
+				20CC428AF6E6429AAA7A251B /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A07AECA1613D4373BB4B987A /* Sources */ = {
+		D5CDC815A111407DAC1F18CC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D652EE79C8CF4D79B3C9114C /* HanziApp.swift in Sources */,
-				3E314A0C1834475AA5B0D392 /* Theme.swift in Sources */,
-				A3DE81F304AD4390962AC672 /* Models.swift in Sources */,
-				AD11C4505ED44082919D776E /* DictDatabase.swift in Sources */,
-				30BF3136BA8E46288E06597D /* UserDatabase.swift in Sources */,
-				E7328B5BC60A4B3BB579BAEE /* TextUtils.swift in Sources */,
-				482116E485DE4307B7F61138 /* Speaker.swift in Sources */,
-				5C3FD0E138F649CCA672DDE3 /* OcrService.swift in Sources */,
-				343471F5967D41B09A14675D /* StrokeMatcher.swift in Sources */,
-				086C4BCEA05B4DE98512AB99 /* HanziCanvasView.swift in Sources */,
-				1D97D80F56034F80B975C00C /* Components.swift in Sources */,
-				704150F0E68F4EC884761488 /* SearchScreenView.swift in Sources */,
-				4F5FB147F7244B7D8DA3EA3B /* WordDetailView.swift in Sources */,
-				DF76062F812440B9A075C9A4 /* CharDetailView.swift in Sources */,
-				48A56CCD7AD24037B12A567F /* PracticeView.swift in Sources */,
-				3E5CDEAAC0E14CF6BE224E84 /* WritingHomeView.swift in Sources */,
-				948A29EE97D04B698293DE8D /* FlashcardView.swift in Sources */,
-				20A228AEC328491EBC20F2F0 /* NotebookView.swift in Sources */,
-				0F34D6C2282C49BE913DE260 /* QuizView.swift in Sources */,
-				2EF1E03EC02D49A1A6EA2156 /* LearnHomeView.swift in Sources */,
-				953E9592DAF4497A9BB39202 /* OcrScannerView.swift in Sources */,
-				198A68057A0A4E8091AD1569 /* MainTabView.swift in Sources */,
+				F0A4263937D64D38B53E9951 /* HanziApp.swift in Sources */,
+				984DE683E4C04D2C8E89EB2C /* Theme.swift in Sources */,
+				45781E5733E9434381F44D65 /* Models.swift in Sources */,
+				9C1C9CB7B73A46AF809539D5 /* DictDatabase.swift in Sources */,
+				36B8572FBA67471C85E1350C /* UserDatabase.swift in Sources */,
+				405143F83BA54EA0A8A30012 /* TextUtils.swift in Sources */,
+				9C4524F14A2A42C28F43B2F7 /* Speaker.swift in Sources */,
+				BA69D627A802470987FBAAF5 /* OcrService.swift in Sources */,
+				1063B817EF03474DB5DA3387 /* StrokeMatcher.swift in Sources */,
+				B978D6FA75C3494DB785AAB1 /* HanziCanvasView.swift in Sources */,
+				EF148023DABA4800A4B3E312 /* Components.swift in Sources */,
+				BDEFDEF6816F42DFBB4C0689 /* SearchScreenView.swift in Sources */,
+				DE16A457E9994FE9813FA882 /* WordDetailView.swift in Sources */,
+				119387E532B54A9B993BADE6 /* CharDetailView.swift in Sources */,
+				2FF2C50759D441CC8F928911 /* PracticeView.swift in Sources */,
+				401D559FD43B4556877F16FB /* WritingHomeView.swift in Sources */,
+				851982BBABC04E8BA0F4C72C /* FlashcardView.swift in Sources */,
+				7F30DFCCFAC94D16B3CEF05F /* NotebookView.swift in Sources */,
+				239E654707454A03A5BD8D30 /* QuizView.swift in Sources */,
+				96EC72C3B0774323BE346511 /* LearnHomeView.swift in Sources */,
+				63A0BA3B19BB42B69D108F72 /* OcrScannerView.swift in Sources */,
+				AFFD72F336E9427D8016E682 /* MainTabView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		4685E8FEE29B4399AE042FB5 /* Debug */ = {
+		96BC35DE5485476B925A388D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -258,7 +241,7 @@
 			};
 			name = Debug;
 		};
-		74DDF35F15F346EA9A140FA9 /* Release */ = {
+		21A7988F8EDC41E8B62F2974 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -280,12 +263,15 @@
 			};
 			name = Release;
 		};
-		F31935B48FCC4558809F632D /* Debug */ = {
+		B4D63D0927574B399755BFFE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
@@ -305,12 +291,15 @@
 			};
 			name = Debug;
 		};
-		7C17437A8C3648FDA34CAC66 /* Release */ = {
+		074F7204E59841EA9FB36E0C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
@@ -333,20 +322,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B8E1A571B99144F0A2850FEC /* Build configuration list for PBXProject "Hanzi" */ = {
+		FB4E10AAB4D74373A78B194F /* Build configuration list for PBXProject "Hanzi" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4685E8FEE29B4399AE042FB5 /* Debug */,
-				74DDF35F15F346EA9A140FA9 /* Release */,
+				96BC35DE5485476B925A388D /* Debug */,
+				21A7988F8EDC41E8B62F2974 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8C66D374A05C43ACB88157E9 /* Build configuration list for PBXNativeTarget "Hanzi" */ = {
+		A751EF4E863E46C290D56C9A /* Build configuration list for PBXNativeTarget "Hanzi" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F31935B48FCC4558809F632D /* Debug */,
-				7C17437A8C3648FDA34CAC66 /* Release */,
+				B4D63D0927574B399755BFFE /* Debug */,
+				074F7204E59841EA9FB36E0C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -354,5 +343,5 @@
 /* End XCConfigurationList section */
 
 	};
-	rootObject = EC0DB5EDF14B4003904E994F /* Project object */;
+	rootObject = CF9AA4DE645349528102F930 /* Project object */;
 }

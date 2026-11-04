@@ -180,15 +180,16 @@ struct HanziCanvasView: View {
         }
     }
     
-    private func processUserStroke(scale: Double) {
+    private func processUserStroke(scale: CGFloat) {
         guard currentPoints.count >= 2, doneStrokes < medians.count else {
             currentPoints.removeAll()
             return
         }
         
         // Convert screen coordinates to 1024x1024 Hanzi coordinates
+        let s = Double(scale)
         let pts: [Pt] = currentPoints.map { pt in
-            Pt(x: Double(pt.x) / scale, y: 900.0 - Double(pt.y) / scale)
+            Pt(x: Double(pt.x) / s, y: 900.0 - Double(pt.y) / s)
         }
         
         let targetMedian = medians[doneStrokes]
