@@ -1,6 +1,16 @@
 import Foundation
 import SQLite3
 
+private func sqliteString(_ stmt: OpaquePointer?, _ index: Int32) -> String {
+    guard let stmt = stmt, let ptr = sqlite3_column_text(stmt, index) else { return "" }
+    return String(cString: ptr)
+}
+private func sqliteStringOpt(_ stmt: OpaquePointer?, _ index: Int32) -> String? {
+    guard let stmt = stmt, let ptr = sqlite3_column_text(stmt, index) else { return nil }
+    return String(cString: ptr)
+}
+
+
 final class DictDatabase {
     static let shared = DictDatabase()
     private var db: OpaquePointer?
@@ -206,9 +216,9 @@ final class DictDatabase {
             sqlite3_bind_int(stmt, 1, Int32(wordId))
             while sqlite3_step(stmt) == SQLITE_ROW {
                 let id = Int(sqlite3_column_int(stmt, 0))
-                let kind = sqlite3_column_text(stmt, 1).map { String(cString: $0) }
-                let gloss = String(cString: sqlite3_column_text(stmt, 2))
-                let explain = sqlite3_column_text(stmt, 3).map { String(cString: $0) }
+                let kind = sqliteStringOpt(stmt, 1)
+                let gloss = sqliteString(stmt, 2)
+                let explain = sqliteStringOpt(stmt, 3)
                 
                 let examples = senseExamples(senseId: id)
                 result.append(Sense(id: id, kind: kind, gloss: gloss, explain: explain, examples: examples))
@@ -247,13 +257,11 @@ final class DictDatabase {
         if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
             sqlite3_bind_int(stmt, 1, Int32(wordId))
             while sqlite3_step(stmt) == SQLITE_ROW {
-                let kind = String(cString: sqlite3_column_text(stmt, 0))
-                var target = String(cString: sqlite3_column_text(stmt, 1))
-                if let extraC = sqlite3_column_text(stmt, 2) {
-                    let extra = String(cString: extraC)
-                    if kind == "measure" && !extra.isEmpty {
-                        target = "\(target) (\(extra))"
-                    }
+                let kind = sqliteString(stmt, 0)
+                var target = sqliteString(stmt, 1)
+                let extra = sqliteString(stmt, 2)
+                if kind == "measure" && !extra.isEmpty {
+                    target = "\(target) (\(extra))"
                 }
                 map[kind, default: []].append(target)
             }
@@ -271,10 +279,10 @@ final class DictDatabase {
         if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
             sqlite3_bind_int(stmt, 1, Int32(wordId))
             while sqlite3_step(stmt) == SQLITE_ROW {
-                let kind = String(cString: sqlite3_column_text(stmt, 0))
-                let title = String(cString: sqlite3_column_text(stmt, 1))
-                let body = sqlite3_column_text(stmt, 2).map { String(cString: $0) } ?? ""
-                let examplesStr = sqlite3_column_text(stmt, 3).map { String(cString: $0) } ?? "[]"
+                let kind = sqliteString(stmt, 0)
+                let title = sqliteString(stmt, 1)
+                let body = sqliteStringOpt(stmt, 2) ?? ""
+                let examplesStr = sqliteStringOpt(stmt, 3) ?? "[]"
                 
                 var examples: [Example] = []
                 if let data = examplesStr.data(using: .utf8),
@@ -317,18 +325,18 @@ final class DictDatabase {
         if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
             sqlite3_bind_text(stmt, 1, (c as NSString).utf8String, -1, nil)
             if sqlite3_step(stmt) == SQLITE_ROW {
-                let char = String(cString: sqlite3_column_text(stmt, 0))
-                let strokesJson = String(cString: sqlite3_column_text(stmt, 1))
-                let mediansJson = String(cString: sqlite3_column_text(stmt, 2))
+                let char = sqliteString(stmt, 0)
+                let strokesJson = sqliteString(stmt, 1)
+                let mediansJson = sqliteString(stmt, 2)
                 let strokeCount = Int(sqlite3_column_int(stmt, 3))
-                let radical = String(cString: sqlite3_column_text(stmt, 4))
-                let radPinyin = sqlite3_column_text(stmt, 5).map { String(cString: $0) } ?? ""
-                let radMeaning = sqlite3_column_text(stmt, 6).map { String(cString: $0) } ?? ""
-                let pinyinsJson = String(cString: sqlite3_column_text(stmt, 7))
-                let hanvietsJson = String(cString: sqlite3_column_text(stmt, 8))
-                let shortMean = sqlite3_column_text(stmt, 9).map { String(cString: $0) } ?? ""
-                let componentsJson = String(cString: sqlite3_column_text(stmt, 10))
-                let compDetailJson = String(cString: sqlite3_column_text(stmt, 11))
+                let radical = sqliteString(stmt, 4)
+                let radPinyin = sqliteStringOpt(stmt, 5) ?? ""
+                let radMeaning = sqliteStringOpt(stmt, 6) ?? ""
+                let pinyinsJson = sqliteString(stmt, 7)
+                let hanvietsJson = sqliteString(stmt, 8)
+                let shortMean = sqliteStringOpt(stmt, 9) ?? ""
+                let componentsJson = sqliteString(stmt, 10)
+                let compDetailJson = sqliteString(stmt, 11)
                 
                 let strokes = (try? JSONDecoder().decode([String].self, from: Data(strokesJson.utf8))) ?? []
                 let medians = (try? JSONDecoder().decode([[[Double]]].self, from: Data(mediansJson.utf8))) ?? []
@@ -388,7 +396,7 @@ final class DictDatabase {
         if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
             while sqlite3_step(stmt) == SQLITE_ROW {
                 let id = Int(sqlite3_column_int(stmt, 0))
-                let name = String(cString: sqlite3_column_text(stmt, 1))
+                let name = sqliteString(stmt, 1)
                 let n = Int(sqlite3_column_int(stmt, 2))
                 result.append(Topic(id: id, name: name, count: n))
             }
@@ -425,8 +433,9 @@ final class DictDatabase {
         
         if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
             while sqlite3_step(stmt) == SQLITE_ROW {
-                if let str = sqlite3_column_text(stmt, 0) {
-                    result.append(String(cString: str))
+                let str = sqliteString(stmt, 0)
+                if !str.isEmpty {
+                    result.append(str)
                 }
             }
         }
@@ -442,11 +451,11 @@ final class DictDatabase {
         if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
             while sqlite3_step(stmt) == SQLITE_ROW {
                 let id = Int(sqlite3_column_int(stmt, 0))
-                let lv = String(cString: sqlite3_column_text(stmt, 1))
-                let title = String(cString: sqlite3_column_text(stmt, 2))
-                let keywords = sqlite3_column_text(stmt, 3).map { String(cString: $0) } ?? ""
-                let useFor = sqlite3_column_text(stmt, 4).map { String(cString: $0) } ?? ""
-                let bodyJson = sqlite3_column_text(stmt, 5).map { String(cString: $0) } ?? "[]"
+                let lv = sqliteString(stmt, 1)
+                let title = sqliteString(stmt, 2)
+                let keywords = sqliteStringOpt(stmt, 3) ?? ""
+                let useFor = sqliteStringOpt(stmt, 4) ?? ""
+                let bodyJson = sqliteStringOpt(stmt, 5) ?? "[]"
                 let body = (try? JSONDecoder().decode([String].self, from: Data(bodyJson.utf8))) ?? []
                 result.append(Grammar(id: id, level: lv, title: title, keywords: keywords, useFor: useFor, body: body))
             }
@@ -465,11 +474,11 @@ final class DictDatabase {
             sqlite3_bind_text(stmt, 1, (level as NSString).utf8String, -1, nil)
             while sqlite3_step(stmt) == SQLITE_ROW {
                 let id = Int(sqlite3_column_int(stmt, 0))
-                let lv = String(cString: sqlite3_column_text(stmt, 1))
-                let title = String(cString: sqlite3_column_text(stmt, 2))
-                let keywords = sqlite3_column_text(stmt, 3).map { String(cString: $0) } ?? ""
-                let useFor = sqlite3_column_text(stmt, 4).map { String(cString: $0) } ?? ""
-                let bodyJson = sqlite3_column_text(stmt, 5).map { String(cString: $0) } ?? "[]"
+                let lv = sqliteString(stmt, 1)
+                let title = sqliteString(stmt, 2)
+                let keywords = sqliteStringOpt(stmt, 3) ?? ""
+                let useFor = sqliteStringOpt(stmt, 4) ?? ""
+                let bodyJson = sqliteStringOpt(stmt, 5) ?? "[]"
                 let body = (try? JSONDecoder().decode([String].self, from: Data(bodyJson.utf8))) ?? []
                 
                 result.append(Grammar(id: id, level: lv, title: title, keywords: keywords, useFor: useFor, body: body))
@@ -554,22 +563,22 @@ final class DictDatabase {
     
     private func parseWord(_ stmt: OpaquePointer?) -> Word {
         let id = Int(sqlite3_column_int(stmt, 0))
-        let simp = String(cString: sqlite3_column_text(stmt, 1))
-        let trad = sqlite3_column_text(stmt, 2).map { String(cString: $0) } ?? ""
-        let pinyin = sqlite3_column_text(stmt, 3).map { String(cString: $0) } ?? ""
-        let hanviet = sqlite3_column_text(stmt, 4).map { String(cString: $0) } ?? ""
+        let simp = sqliteString(stmt, 1)
+        let trad = sqliteStringOpt(stmt, 2) ?? ""
+        let pinyin = sqliteStringOpt(stmt, 3) ?? ""
+        let hanviet = sqliteStringOpt(stmt, 4) ?? ""
         let hsk = sqlite3_column_type(stmt, 5) != SQLITE_NULL ? Int(sqlite3_column_int(stmt, 5)) : nil
         let rank = sqlite3_column_type(stmt, 6) != SQLITE_NULL ? Int(sqlite3_column_int(stmt, 6)) : nil
-        let shortMean = sqlite3_column_text(stmt, 7).map { String(cString: $0) } ?? ""
+        let shortMean = sqliteStringOpt(stmt, 7) ?? ""
         
         return Word(id: id, simp: simp, trad: trad, pinyin: pinyin, hanviet: hanviet, hsk: hsk, rank: rank, shortMean: shortMean)
     }
     
     private func parseExample(_ stmt: OpaquePointer?) -> Example {
         let id = Int(sqlite3_column_int(stmt, 0))
-        let zh = String(cString: sqlite3_column_text(stmt, 1))
-        let pinyin = sqlite3_column_text(stmt, 2).map { String(cString: $0) } ?? ""
-        let mean = sqlite3_column_text(stmt, 3).map { String(cString: $0) } ?? ""
+        let zh = sqliteString(stmt, 1)
+        let pinyin = sqliteStringOpt(stmt, 2) ?? ""
+        let mean = sqliteStringOpt(stmt, 3) ?? ""
         return Example(id: id, zh: zh, pinyin: pinyin, mean: mean)
     }
 }

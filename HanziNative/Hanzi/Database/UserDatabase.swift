@@ -2,6 +2,12 @@ import Foundation
 import Combine
 import SQLite3
 
+private func sqliteString(_ stmt: OpaquePointer?, _ index: Int32) -> String {
+    guard let stmt = stmt, let ptr = sqlite3_column_text(stmt, index) else { return "" }
+    return String(cString: ptr)
+}
+
+
 final class UserDatabase: ObservableObject {
     static let shared = UserDatabase()
     private var db: OpaquePointer?
@@ -79,9 +85,8 @@ final class UserDatabase: ObservableObject {
         
         if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
             while sqlite3_step(stmt) == SQLITE_ROW {
-                if let str = sqlite3_column_text(stmt, 0) {
-                    days.insert(String(cString: str))
-                }
+                let str = sqliteString(stmt, 0)
+                if !str.isEmpty { days.insert(str) }
             }
         }
         
@@ -161,9 +166,9 @@ final class UserDatabase: ObservableObject {
         if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
             while sqlite3_step(stmt) == SQLITE_ROW {
                 let id = Int(sqlite3_column_int(stmt, 0))
-                let simp = String(cString: sqlite3_column_text(stmt, 1))
-                let pinyin = sqlite3_column_text(stmt, 2).map { String(cString: $0) } ?? ""
-                let mean = sqlite3_column_text(stmt, 3).map { String(cString: $0) } ?? ""
+                let simp = sqliteString(stmt, 1)
+                let pinyin = sqliteString(stmt, 2)
+                let mean = sqliteString(stmt, 3)
                 result.append(Word(id: id, simp: simp, trad: "", pinyin: pinyin, hanviet: "", hsk: nil, rank: nil, shortMean: mean))
             }
         }
@@ -199,9 +204,9 @@ final class UserDatabase: ObservableObject {
         if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
             while sqlite3_step(stmt) == SQLITE_ROW {
                 let id = Int(sqlite3_column_int(stmt, 0))
-                let simp = String(cString: sqlite3_column_text(stmt, 1))
-                let pinyin = sqlite3_column_text(stmt, 2).map { String(cString: $0) } ?? ""
-                let mean = sqlite3_column_text(stmt, 3).map { String(cString: $0) } ?? ""
+                let simp = sqliteString(stmt, 1)
+                let pinyin = sqliteString(stmt, 2)
+                let mean = sqliteString(stmt, 3)
                 result.append(Word(id: id, simp: simp, trad: "", pinyin: pinyin, hanviet: "", hsk: nil, rank: nil, shortMean: mean))
             }
         }
@@ -359,7 +364,7 @@ final class UserDatabase: ObservableObject {
         var result: [[String: Any]] = []
         if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
             while sqlite3_step(stmt) == SQLITE_ROW {
-                let char = String(cString: sqlite3_column_text(stmt, 0))
+                let char = sqliteString(stmt, 0)
                 let attempts = Int(sqlite3_column_int(stmt, 1))
                 let mistakes = Int(sqlite3_column_int(stmt, 2))
                 let best = Int(sqlite3_column_int(stmt, 3))
@@ -379,9 +384,9 @@ final class UserDatabase: ObservableObject {
     
     private func parseSrs(_ stmt: OpaquePointer?) -> SrsCard {
         let wordId = Int(sqlite3_column_int(stmt, 0))
-        let simp = String(cString: sqlite3_column_text(stmt, 1))
-        let pinyin = sqlite3_column_text(stmt, 2).map { String(cString: $0) } ?? ""
-        let mean = sqlite3_column_text(stmt, 3).map { String(cString: $0) } ?? ""
+        let simp = sqliteString(stmt, 1)
+        let pinyin = sqliteString(stmt, 2)
+        let mean = sqliteString(stmt, 3)
         let reps = Int(sqlite3_column_int(stmt, 4))
         let intervalDays = Int(sqlite3_column_int(stmt, 5))
         let ease = sqlite3_column_double(stmt, 6)
