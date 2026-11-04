@@ -1,6 +1,7 @@
 # Uncompressed SQLite DB (>100MB GitHub limit); vi_full.db.gz is tracked instead
 /vi_full.db
 /app/assets/db/vi_full.db
+/HanziNative/Hanzi/Resources/vi_full.db
 /app/user_preview.db
 /app/build/
 /app/.dart_tool/

@@ -12,41 +12,41 @@ permissions:
 
 jobs:
   build-ios:
-    name: Build iOS (.ipa)
+    name: Build Native iOS (.ipa)
     runs-on: macos-14
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Decompress bundled dictionary DB
+      - name: Decompress dictionary DB
         run: |
-          mkdir -p app/assets/db
-          gzip -d -c vi_full.db.gz > app/assets/db/vi_full.db
+          mkdir -p HanziNative/Hanzi/Resources
+          gzip -d -c vi_full.db.gz > HanziNative/Hanzi/Resources/vi_full.db
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Build iOS Release (No Codesign)
-        working-directory: app
+      - name: Build Native iOS App (No Codesign)
         run: |
-          flutter pub get
-          flutter build ios --release --no-codesign
+          xcodebuild build \
+            -project HanziNative/Hanzi.xcodeproj \
+            -scheme Hanzi \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath HanziNative/build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO
 
-      - name: Package Runner.app into Hanzi-iOS.ipa
-        working-directory: app/build/ios/iphoneos
+      - name: Package Hanzi.app into Hanzi-iOS.ipa
+        working-directory: HanziNative/build/Build/Products/Release-iphoneos
         run: |
           mkdir -p Payload
-          cp -r Runner.app Payload/
+          cp -r Hanzi.app Payload/
           zip -r -9 Hanzi-iOS.ipa Payload
 
       - name: Upload Hanzi-iOS.ipa Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Hanzi-iOS-IPA
-          path: app/build/ios/iphoneos/Hanzi-iOS.ipa
+          path: HanziNative/build/Build/Products/Release-iphoneos/Hanzi-iOS.ipa
           retention-days: 30
 
   build-android:
