@@ -182,12 +182,26 @@ class _HskTab extends StatelessWidget {
   }
 }
 
-class _TopicTab extends StatelessWidget {
+class _TopicTab extends StatefulWidget {
   const _TopicTab();
   @override
+  State<_TopicTab> createState() => _TopicTabState();
+}
+
+class _TopicTabState extends State<_TopicTab>
+    with AutomaticKeepAliveClientMixin {
+  // Created once: a future built inside build() re-queries the DB and flashes
+  // the loading spinner on every rebuild (e.g. when navigating back).
+  late final Future<List<Topic>> _future = DictDb.instance.topics();
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return FutureBuilder<List<Topic>>(
-      future: DictDb.instance.topics(),
+      future: _future,
       builder: (_, s) {
         if (!s.hasData) return const Loading();
         return GridView.builder(
@@ -231,12 +245,24 @@ class _TopicTab extends StatelessWidget {
   }
 }
 
-class _GrammarTab extends StatelessWidget {
+class _GrammarTab extends StatefulWidget {
   const _GrammarTab();
   @override
+  State<_GrammarTab> createState() => _GrammarTabState();
+}
+
+class _GrammarTabState extends State<_GrammarTab>
+    with AutomaticKeepAliveClientMixin {
+  late final Future<List<String>> _future = DictDb.instance.grammarLevels();
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return FutureBuilder<List<String>>(
-      future: DictDb.instance.grammarLevels(),
+      future: _future,
       builder: (_, s) {
         if (!s.hasData) return const Loading();
         return ListView(
@@ -266,15 +292,23 @@ class _GrammarTab extends StatelessWidget {
   }
 }
 
-class _GrammarList extends StatelessWidget {
+class _GrammarList extends StatefulWidget {
   final String level;
   const _GrammarList({required this.level});
   @override
+  State<_GrammarList> createState() => _GrammarListState();
+}
+
+class _GrammarListState extends State<_GrammarList> {
+  late final Future<List<Grammar>> _future =
+      DictDb.instance.grammarByLevel(widget.level);
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Ngữ pháp $level')),
+      appBar: AppBar(title: Text('Ngữ pháp ${widget.level}')),
       body: FutureBuilder<List<Grammar>>(
-        future: DictDb.instance.grammarByLevel(level),
+        future: _future,
         builder: (_, s) {
           if (!s.hasData) return const Loading();
           return ListView.separated(
@@ -348,9 +382,13 @@ class _QuizTab extends StatefulWidget {
   State<_QuizTab> createState() => _QuizTabState();
 }
 
-class _QuizTabState extends State<_QuizTab> {
+class _QuizTabState extends State<_QuizTab>
+    with AutomaticKeepAliveClientMixin {
   int? _hsk = 1;
   List<Map<String, Object?>> _history = [];
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -375,6 +413,7 @@ class _QuizTabState extends State<_QuizTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [

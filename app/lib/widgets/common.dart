@@ -52,8 +52,14 @@ class WordTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () => Navigator.push(context,
-          MaterialPageRoute(builder: (_) => WordScreen(wordId: id))),
+      onTap: () {
+        // Drop keyboard focus first: otherwise Flutter restores focus to the
+        // search field when this route is popped, re-opening the keyboard and
+        // relayouting the whole home screen during the back transition.
+        FocusManager.instance.primaryFocus?.unfocus();
+        Navigator.push(context,
+            MaterialPageRoute(builder: (_) => WordScreen(wordId: id)));
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
