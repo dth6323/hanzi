@@ -32,6 +32,7 @@ struct Sense: Identifiable, Hashable {
 }
 
 struct Note: Identifiable, Hashable {
+    var id: String { "\(kind)_\(title)" }
     let kind: String
     let title: String
     let body: String
