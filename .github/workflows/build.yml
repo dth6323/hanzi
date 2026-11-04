@@ -25,6 +25,7 @@ jobs:
 
       - name: Build Native iOS App (No Codesign)
         run: |
+          set -o pipefail
           xcodebuild build \
             -project HanziNative/Hanzi.xcodeproj \
             -scheme Hanzi \
@@ -35,7 +36,20 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            AD_HOC_CODE_SIGNING_ALLOWED=YES
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            DEVELOPMENT_TEAM="" 2>&1 | tee build.log || {
+              echo "==================== BUILD ERROR ===================="
+              grep -E -C 5 "(error:|fatal error:|BUILD FAILED|The following build commands failed)" build.log || tail -n 120 build.log
+              exit 1
+            }
+
+      - name: Upload Build Log on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Xcodebuild-Failure-Log
+          path: build.log
 
       - name: Package Hanzi.app into Hanzi-iOS.ipa
         working-directory: HanziNative/build/Build/Products/Release-iphoneos
