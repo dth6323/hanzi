@@ -13,6 +13,7 @@ struct Word: Identifiable, Hashable {
     var tradIfDifferent: String? {
         (trad.isEmpty || trad == simp) ? nil : trad
     }
+    var hanViet: String { hanviet }
 }
 
 struct Example: Identifiable, Hashable {
@@ -100,6 +101,18 @@ struct SrsCard: Identifiable, Hashable {
     var front: String { simp }
     var meaning: String { mean }
     var hanViet: String { "" }
+    
+    init(wordId: Int, simp: String, pinyin: String, mean: String, reps: Int, intervalDays: Int, ease: Double, dueMs: Int64, lastReviewMs: Int64) {
+        self.wordId = wordId
+        self.simp = simp
+        self.pinyin = pinyin
+        self.mean = mean
+        self.reps = reps
+        self.intervalDays = intervalDays
+        self.ease = ease
+        self.dueMs = dueMs
+        self.lastReviewMs = lastReviewMs
+    }
     
     init(id: Int = 0, wordId: Int, front: String, pinyin: String, hanViet: String = "", meaning: String, intervalDays: Int = 1, easeFactor: Double = 2.5, reps: Int = 0, lapses: Int = 0, dueDays: Int = 0, lastReviewed: Int64? = nil) {
         self.wordId = wordId

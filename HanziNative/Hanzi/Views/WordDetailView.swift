@@ -160,19 +160,13 @@ struct WordDetailView: View {
                                             .background(AppColors.surface2)
                                             .cornerRadius(10)
                                     } else {
-                                        Button {
-                                            if let target = DictDatabase.shared.wordBySimp(item) {
-                                                // Handle navigation in SwiftUI
-                                            }
-                                        } label: {
-                                            Text(item)
-                                                .font(.system(size: 14, weight: .medium))
-                                                .foregroundColor(AppColors.text)
-                                                .padding(.horizontal, 12)
-                                                .padding(.vertical, 6)
-                                                .background(AppColors.surface2)
-                                                .cornerRadius(10)
-                                        }
+                                        Text(item)
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(AppColors.text)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(AppColors.surface2)
+                                            .cornerRadius(10)
                                     }
                                 }
                             }
