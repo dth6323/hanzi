@@ -46,32 +46,60 @@ class _WordScreenState extends State<WordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<_WordData?>(
-      future: _future,
-      builder: (context, snap) {
-        final d = snap.data;
-        return Scaffold(
-          appBar: AppBar(
-            actions: [
-              if (d != null)
-                IconButton(
-                  icon: Icon(_fav ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                      color: _fav ? AppColors.gold : null),
-                  onPressed: () async {
-                    await UserDb.instance.setFavorite(d.word.id, d.word.simp,
-                        d.word.pinyin, d.word.shortMean, !_fav);
-                    setState(() => _fav = !_fav);
-                  },
-                ),
-            ],
-          ),
-          body: snap.connectionState != ConnectionState.done
-              ? const Loading()
-              : d == null
-                  ? const Center(child: Text('Không tìm thấy từ'))
-                  : _content(d),
-        );
-      },
+    return RepaintBoundary(
+      child: PopScope(
+        canPop: true,
+        onPopInvokedWithResult: (didPop, _) {
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        child: FutureBuilder<_WordData?>(
+          future: _future,
+          builder: (context, snap) {
+            final d = snap.data;
+            return Scaffold(
+              backgroundColor: AppColors.bg,
+              appBar: AppBar(
+                actions: [
+                  if (d != null)
+                    IconButton(
+                      icon: Icon(_fav ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                          color: _fav ? AppColors.gold : null),
+                      onPressed: () async {
+                        await UserDb.instance.setFavorite(d.word.id, d.word.simp,
+                            d.word.pinyin, d.word.shortMean, !_fav);
+                        setState(() => _fav = !_fav);
+                      },
+                    ),
+                ],
+              ),
+              body: Stack(
+                children: [
+                  snap.connectionState != ConnectionState.done
+                      ? const Loading()
+                      : d == null
+                          ? const Center(child: Text('Không tìm thấy từ'))
+                          : _content(d),
+                  // Vuốt từ mép phải sang trái để quay lại (cho thói quen ngón cái tay phải)
+                  Positioned(
+                    top: 0,
+                    bottom: 0,
+                    right: 0,
+                    width: 28,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onHorizontalDragEnd: (details) {
+                        if ((details.primaryVelocity ?? 0) < -150) {
+                          Navigator.maybePop(context);
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 

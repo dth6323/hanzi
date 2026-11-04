@@ -20,9 +20,18 @@ class _CharScreenState extends State<CharScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Chữ ${widget.char}')),
-      body: FutureBuilder<HanChar?>(
+    return RepaintBoundary(
+      child: PopScope(
+        canPop: true,
+        onPopInvokedWithResult: (didPop, _) {
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.bg,
+          appBar: AppBar(title: Text('Chữ ${widget.char}')),
+          body: Stack(
+            children: [
+              FutureBuilder<HanChar?>(
         future: _future,
         builder: (context, snap) {
           if (snap.connectionState != ConnectionState.done) {
@@ -134,8 +143,27 @@ class _CharScreenState extends State<CharScreen> {
           );
         },
       ),
-    );
-  }
+      // Vuốt từ mép phải sang trái để quay lại
+      Positioned(
+        top: 0,
+        bottom: 0,
+        right: 0,
+        width: 28,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onHorizontalDragEnd: (details) {
+            if ((details.primaryVelocity ?? 0) < -150) {
+              Navigator.maybePop(context);
+            }
+          },
+        ),
+      ),
+    ],
+  ),
+),
+),
+);
+}
 
   Widget _row(String k, String? v) {
     if (v == null || v.isEmpty) return const SizedBox.shrink();

@@ -18,6 +18,7 @@ import Vision
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    window?.backgroundColor = UIColor(red: 0x12/255.0, green: 0x10/255.0, blue: 0x0F/255.0, alpha: 1.0)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 

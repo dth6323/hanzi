@@ -58,63 +58,65 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-            child: Row(children: [
-              const Text('汉',
-                  style: TextStyle(
-                      fontSize: 30,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w800)),
-              const SizedBox(width: 10),
-              const Text('Từ điển Trung – Việt',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-            ]),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
-            child: TextField(
-              key: const Key('search_input'),
-              controller: _ctrl,
-              onChanged: _onChanged,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: 'Chữ Hán, pinyin, Hán Việt hoặc nghĩa…',
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (_ctrl.text.isNotEmpty)
+    return RepaintBoundary(
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+              child: Row(children: [
+                const Text('汉',
+                    style: TextStyle(
+                        fontSize: 30,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w800)),
+                const SizedBox(width: 10),
+                const Text('Từ điển Trung – Việt',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+              ]),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+              child: TextField(
+                key: const Key('search_input'),
+                controller: _ctrl,
+                onChanged: _onChanged,
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  hintText: 'Chữ Hán, pinyin, Hán Việt hoặc nghĩa…',
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_ctrl.text.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () {
+                            _ctrl.clear();
+                            _run('');
+                          },
+                        ),
                       IconButton(
-                        icon: const Icon(Icons.close_rounded),
-                        onPressed: () {
-                          _ctrl.clear();
-                          _run('');
+                        tooltip: 'Quét ảnh / Chụp màn hình OCR',
+                        icon: const Icon(Icons.document_scanner_rounded,
+                            color: AppColors.gold),
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const OcrScreen()),
+                          );
+                          _loadHistory();
                         },
                       ),
-                    IconButton(
-                      tooltip: 'Quét ảnh / Chụp màn hình OCR',
-                      icon: const Icon(Icons.document_scanner_rounded,
-                          color: AppColors.gold),
-                      onPressed: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const OcrScreen()),
-                        );
-                        _loadHistory();
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          Expanded(child: _body()),
-        ],
+            Expanded(child: _body()),
+          ],
+        ),
       ),
     );
   }
