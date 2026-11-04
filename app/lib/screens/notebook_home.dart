@@ -273,6 +273,35 @@ class NotebookHomeState extends State<NotebookHome> {
                     ),
                     const Divider(height: 1, indent: 16),
                   ],
+                const SizedBox(height: 28),
+                Center(
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Hán Tự · Từ điển & Luyện viết tiếng Trung',
+                        style: TextStyle(fontSize: 12, color: AppColors.muted),
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface2,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.gold.withOpacity(0.3)),
+                        ),
+                        child: const Text(
+                          'Phiên bản 1.0.0 (Web PWA)',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.gold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
               ],
             ),
           );

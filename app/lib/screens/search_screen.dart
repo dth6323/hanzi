@@ -74,6 +74,17 @@ class _SearchScreenState extends State<SearchScreen> {
                 const SizedBox(width: 10),
                 const Text('Từ điển Trung – Việt',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface2,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: AppColors.gold.withOpacity(0.3), width: 0.8),
+                  ),
+                  child: const Text('v1.0.0',
+                      style: TextStyle(fontSize: 11, color: AppColors.gold, fontWeight: FontWeight.w700)),
+                ),
               ]),
             ),
             Padding(
