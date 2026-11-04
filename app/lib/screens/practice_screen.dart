@@ -21,6 +21,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
   final _canvas = GlobalKey<HanziCanvasState>();
   final List<HanChar> _chars = [];
   bool _loading = true;
+  bool _canvasTouching = false;
   int _index = 0;
   WriteMode _mode = WriteMode.trace;
   String _feedback = '';
@@ -123,6 +124,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
     final showInfo = _mode != WriteMode.recall || _score != null;
     return SafeArea(
       child: ListView(
+        physics: _canvasTouching
+            ? const NeverScrollableScrollPhysics()
+            : const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
         children: [
           SegmentedButton<WriteMode>(
@@ -263,12 +267,24 @@ class _PracticeScreenState extends State<PracticeScreen> {
                         offset: const Offset(0, 8)),
                   ],
                 ),
-                child: HanziCanvas(
-                  key: _canvas,
-                  char: c,
-                  mode: _mode,
-                  onStroke: _onStroke,
-                  onComplete: _onComplete,
+                child: Listener(
+                  behavior: HitTestBehavior.opaque,
+                  onPointerDown: (_) {
+                    if (!_canvasTouching) setState(() => _canvasTouching = true);
+                  },
+                  onPointerUp: (_) {
+                    if (_canvasTouching) setState(() => _canvasTouching = false);
+                  },
+                  onPointerCancel: (_) {
+                    if (_canvasTouching) setState(() => _canvasTouching = false);
+                  },
+                  child: HanziCanvas(
+                    key: _canvas,
+                    char: c,
+                    mode: _mode,
+                    onStroke: _onStroke,
+                    onComplete: _onComplete,
+                  ),
                 ),
               ),
             ),

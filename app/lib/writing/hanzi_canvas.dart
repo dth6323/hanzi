@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:path_drawing/path_drawing.dart';
 
@@ -8,6 +9,19 @@ import '../theme.dart';
 import 'stroke_matcher.dart';
 
 enum WriteMode { watch, trace, recall }
+
+/// A custom pan recognizer that eagerly wins the gesture arena immediately on
+/// pointer-down so vertical strokes (e.g. "nét sổ thẳng") never get stolen
+/// by parent scrollables like ListView.
+class _ImmediatePanGestureRecognizer extends PanGestureRecognizer {
+  _ImmediatePanGestureRecognizer() : super(debugOwner: 'HanziCanvas');
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
+    resolve(GestureDisposition.accepted);
+  }
+}
 
 /// Draws a character from Make Me a Hanzi data and lets the user
 /// animate it or write it stroke by stroke with feedback.
@@ -194,10 +208,19 @@ class HanziCanvasState extends State<HanziCanvas>
       aspectRatio: 1,
       child: LayoutBuilder(builder: (context, c) {
         final size = Size(c.maxWidth, c.maxWidth);
-        return GestureDetector(
-          onPanStart: _onPanStart,
-          onPanUpdate: _onPanUpdate,
-          onPanEnd: (_) => _onPanEnd(size),
+        return RawGestureDetector(
+          gestures: {
+            _ImmediatePanGestureRecognizer: GestureRecognizerFactoryWithHandlers<
+                _ImmediatePanGestureRecognizer>(
+              () => _ImmediatePanGestureRecognizer(),
+              (_ImmediatePanGestureRecognizer instance) {
+                instance
+                  ..onStart = _onPanStart
+                  ..onUpdate = _onPanUpdate
+                  ..onEnd = (_) => _onPanEnd(size);
+              },
+            ),
+          },
           child: CustomPaint(
             size: size,
             painter: _HanziPainter(
