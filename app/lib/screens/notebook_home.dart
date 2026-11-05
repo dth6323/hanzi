@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import '../data/dict_db.dart';
 import '../data/user_db.dart';
 import '../theme.dart';
+import '../version.dart';
 import '../widgets/common.dart';
 import 'flashcard_screen.dart';
 
@@ -287,11 +288,11 @@ class NotebookHomeState extends State<NotebookHome> {
                         decoration: BoxDecoration(
                           color: AppColors.surface2,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.gold.withOpacity(0.3)),
+                          border: Border.all(color: AppColors.gold.withValues(alpha: 0.3)),
                         ),
-                        child: const Text(
-                          'Phiên bản 1.0.0 (Web PWA)',
-                          style: TextStyle(
+                        child: Text(
+                          AppVersion.full,
+                          style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: AppColors.gold,

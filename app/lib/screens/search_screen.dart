@@ -6,6 +6,7 @@ import '../data/dict_db.dart';
 import '../data/models.dart';
 import '../data/user_db.dart';
 import '../theme.dart';
+import '../version.dart';
 import '../widgets/common.dart';
 import 'ocr_screen.dart';
 
@@ -80,10 +81,10 @@ class _SearchScreenState extends State<SearchScreen> {
                   decoration: BoxDecoration(
                     color: AppColors.surface2,
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: AppColors.gold.withOpacity(0.3), width: 0.8),
+                    border: Border.all(color: AppColors.gold.withValues(alpha: 0.3), width: 0.8),
                   ),
-                  child: const Text('v1.0.0',
-                      style: TextStyle(fontSize: 11, color: AppColors.gold, fontWeight: FontWeight.w700)),
+                  child: Text(AppVersion.badge,
+                      style: const TextStyle(fontSize: 11, color: AppColors.gold, fontWeight: FontWeight.w700)),
                 ),
               ]),
             ),
