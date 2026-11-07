@@ -137,4 +137,12 @@ void main() {
           isTrue);
     });
   });
+
+  test('handwriting recognition stroke preprocessing', () {
+    final meds = _medians('好');
+    if (meds == null) return;
+    expect(meds.length, 6);
+    final r0 = resample(meds[0], 12);
+    expect(r0.length, 12);
+  });
 }

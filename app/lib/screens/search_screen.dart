@@ -8,6 +8,7 @@ import '../data/user_db.dart';
 import '../theme.dart';
 import '../version.dart';
 import '../widgets/common.dart';
+import '../widgets/handwriting_search_sheet.dart';
 import 'ocr_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -109,6 +110,19 @@ class _SearchScreenState extends State<SearchScreen> {
                             _run('');
                           },
                         ),
+                      IconButton(
+                        tooltip: 'Viết tay tra từ (Nhận dạng chữ viết)',
+                        icon: const Icon(Icons.draw_rounded,
+                            color: AppColors.primary),
+                        onPressed: () async {
+                          final recognized =
+                              await showHandwritingSearchSheet(context);
+                          if (recognized != null && recognized.isNotEmpty) {
+                            _ctrl.text = recognized;
+                            _run(recognized);
+                          }
+                        },
+                      ),
                       IconButton(
                         tooltip: 'Quét ảnh / Chụp màn hình OCR',
                         icon: const Icon(Icons.document_scanner_rounded,

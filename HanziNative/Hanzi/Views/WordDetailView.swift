@@ -6,6 +6,7 @@ struct WordDetailView: View {
     @State private var senses: [Sense] = []
     @State private var relations: [String: [String]] = [:]
     @State private var notes: [Note] = []
+    @State private var hanChars: [HanChar] = []
     @State private var isFav: Bool = false
     @State private var isLoading = true
     
@@ -70,19 +71,91 @@ struct WordDetailView: View {
                             .stroke(AppColors.primary.opacity(0.3), lineWidth: 1)
                     )
                     
-                    // Characters for Stroke Order Practice
-                    let chars = cjkChars(w.simp)
-                    if !chars.isEmpty {
-                        SectionHeaderView(title: "Chữ Hán · luyện nét viết")
-                        HStack(spacing: 12) {
-                            ForEach(chars, id: \.self) { c in
-                                NavigationLink(destination: CharDetailView(char: c)) {
-                                    Text(c)
-                                        .font(.system(size: 32, weight: .medium))
-                                        .foregroundColor(AppColors.ink)
-                                        .frame(width: 64, height: 64)
-                                        .background(AppColors.paper)
-                                        .cornerRadius(14)
+                    // Characters, Radicals & Structure Breakdown
+                    if !hanChars.isEmpty {
+                        SectionHeaderView(title: "Cấu tạo chữ Hán & Bộ thủ")
+                        VStack(spacing: 10) {
+                            ForEach(hanChars) { hc in
+                                NavigationLink(destination: CharDetailView(char: hc.char)) {
+                                    HStack(spacing: 12) {
+                                        Text(hc.char)
+                                            .font(.system(size: 28, weight: .bold))
+                                            .foregroundColor(AppColors.ink)
+                                            .frame(width: 52, height: 52)
+                                            .background(AppColors.paper)
+                                            .cornerRadius(12)
+                                        
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            HStack(spacing: 6) {
+                                                Text(hc.char)
+                                                    .font(.system(size: 17, weight: .bold))
+                                                    .foregroundColor(AppColors.text)
+                                                Text(hc.pinyin)
+                                                    .font(.system(size: 14, weight: .semibold))
+                                                    .foregroundColor(AppColors.gold)
+                                                if !hc.hanViet.isEmpty {
+                                                    Text(hc.hanViet.uppercased())
+                                                        .font(.system(size: 12, weight: .semibold))
+                                                        .foregroundColor(AppColors.muted)
+                                                }
+                                                if hc.strokeCount > 0 {
+                                                    Spacer()
+                                                    Text("\(hc.strokeCount) nét")
+                                                        .font(.system(size: 11))
+                                                        .foregroundColor(AppColors.muted)
+                                                }
+                                            }
+                                            
+                                            HStack(spacing: 6) {
+                                                if !hc.radical.isEmpty {
+                                                    Text("Bộ: \(hc.radical)")
+                                                        .font(.system(size: 11, weight: .bold))
+                                                        .foregroundColor(AppColors.primary)
+                                                        .padding(.horizontal, 6)
+                                                        .padding(.vertical, 2)
+                                                        .background(AppColors.primary.opacity(0.15))
+                                                        .cornerRadius(6)
+                                                }
+                                                
+                                                if !hc.components.isEmpty {
+                                                    Text("Ghép: \(hc.components.joined(separator: " + "))")
+                                                        .font(.system(size: 11, weight: .medium))
+                                                        .foregroundColor(AppColors.text)
+                                                        .padding(.horizontal, 6)
+                                                        .padding(.vertical, 2)
+                                                        .background(AppColors.surface2)
+                                                        .cornerRadius(6)
+                                                }
+                                            }
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 13, weight: .semibold))
+                                            .foregroundColor(AppColors.muted)
+                                    }
+                                    .padding(12)
+                                    .background(AppColors.surface)
+                                    .cornerRadius(14)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    } else {
+                        let chars = cjkChars(w.simp)
+                        if !chars.isEmpty {
+                            SectionHeaderView(title: "Chữ Hán · luyện nét viết")
+                            HStack(spacing: 12) {
+                                ForEach(chars, id: \.self) { c in
+                                    NavigationLink(destination: CharDetailView(char: c)) {
+                                        Text(c)
+                                            .font(.system(size: 32, weight: .medium))
+                                            .foregroundColor(AppColors.ink)
+                                            .frame(width: 64, height: 64)
+                                            .background(AppColors.paper)
+                                            .cornerRadius(14)
+                                    }
                                 }
                             }
                         }
@@ -223,6 +296,7 @@ struct WordDetailView: View {
                 let s = db.senses(wordId: w.id)
                 let r = db.relations(wordId: w.id)
                 let n = db.notes(wordId: w.id)
+                let hc = cjkChars(w.simp).compactMap { db.char($0) }
                 let fav = udb.isFavorite(wordId: w.id)
                 udb.addHistory(wordId: w.id, simp: w.simp, pinyin: w.pinyin, mean: w.shortMean)
                 
@@ -231,6 +305,7 @@ struct WordDetailView: View {
                     self.senses = s
                     self.relations = r
                     self.notes = n
+                    self.hanChars = hc
                     self.isFav = fav
                     self.isLoading = false
                 }

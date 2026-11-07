@@ -581,4 +581,135 @@ final class DictDatabase {
         let mean = sqliteStringOpt(stmt, 3) ?? ""
         return Example(id: id, zh: zh, pinyin: pinyin, mean: mean)
     }
+    
+    // MARK: - Handwriting Recognition
+    
+    func recognizeHandwriting(strokes: [[CGPoint]], canvasSize: CGSize, limit: Int = 12) -> [(char: String, pinyin: String, hanviet: String, score: Double)] {
+        guard let db = db, !strokes.isEmpty, canvasSize.width > 0 else { return [] }
+        let k = strokes.count
+        let minK = max(1, k - 1)
+        let maxK = k + 1
+        
+        let scale = 1024.0 / Double(canvasSize.width)
+        let userStrokes = strokes.map { stroke in
+            stroke.map { Pt(x: Double($0.x) * scale, y: 900.0 - Double($0.y) * scale) }
+        }
+        
+        let nPoints = 12
+        func resamplePts(_ pts: [Pt]) -> [Pt] {
+            guard pts.count >= 2 else { return Array(repeating: pts.first ?? Pt(x: 0, y: 0), count: nPoints) }
+            let total = pathLength(pts)
+            guard total > 0 else { return Array(repeating: pts.first!, count: nPoints) }
+            let step = total / Double(nPoints - 1)
+            var out = [pts[0]]
+            var acc = 0.0
+            var prev = pts[0]
+            var i = 1
+            while i < pts.count && out.count < nPoints {
+                let cur = pts[i]
+                let d = prev.dist(cur)
+                if acc + d >= step && d > 0 {
+                    let t = (step - acc) / d
+                    let q = Pt(x: prev.x + (cur.x - prev.x) * t, y: prev.y + (cur.y - prev.y) * t)
+                    out.append(q)
+                    prev = q
+                    acc = 0.0
+                } else {
+                    acc += d
+                    prev = cur
+                    i += 1
+                }
+            }
+            while out.count < nPoints {
+                out.append(pts.last!)
+            }
+            return out
+        }
+        
+        func strokeDist(_ u: [Pt], _ m: [Pt]) -> Double {
+            var fwd = 0.0
+            for i in 0..<nPoints {
+                fwd += u[i].dist(m[i])
+            }
+            fwd /= Double(nPoints)
+            
+            var rev = 0.0
+            for i in 0..<nPoints {
+                rev += u[nPoints - 1 - i].dist(m[i])
+            }
+            rev = (rev / Double(nPoints)) + 20.0
+            return min(fwd, rev)
+        }
+        
+        let uResampled = userStrokes.map(resamplePts)
+        
+        let sql = "SELECT char, pinyin, hanviet, popular, medians, stroke_count FROM chars WHERE stroke_count BETWEEN ? AND ? AND medians IS NOT NULL"
+        var stmt: OpaquePointer?
+        defer { sqlite3_finalize(stmt) }
+        
+        var candidates: [(char: String, pinyin: String, hanviet: String, score: Double)] = []
+        let popBonus: [String: Double] = [
+            "rất cao": 15.0,
+            "cao": 10.0,
+            "trung bình": 5.0,
+            "thấp": 0.0,
+            "rất thấp": -10.0
+        ]
+        
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            sqlite3_bind_int(stmt, 1, Int32(minK))
+            sqlite3_bind_int(stmt, 2, Int32(maxK))
+            
+            while sqlite3_step(stmt) == SQLITE_ROW {
+                let ch = sqliteString(stmt, 0)
+                let py = sqliteStringOpt(stmt, 1) ?? ""
+                let hv = sqliteStringOpt(stmt, 2) ?? ""
+                let pop = sqliteStringOpt(stmt, 3) ?? ""
+                let mediansJson = sqliteString(stmt, 4)
+                let bonus = popBonus[pop] ?? 0.0
+                
+                guard let rawMed = try? JSONDecoder().decode([[[Double]]].self, from: Data(mediansJson.utf8)), !rawMed.isEmpty else {
+                    continue
+                }
+                
+                let medPts = rawMed.map { s in s.map { p in Pt(x: p[0], y: p[1]) } }
+                let medResampled = medPts.map(resamplePts)
+                
+                var score: Double = 0.0
+                if medPts.count == k {
+                    var inOrder = 0.0
+                    for i in 0..<k {
+                        inOrder += strokeDist(uResampled[i], medResampled[i])
+                    }
+                    inOrder /= Double(k)
+                    
+                    if k <= 4 {
+                        var bestPerm = 0.0
+                        for u in uResampled {
+                            let minD = medResampled.map { strokeDist(u, $0) }.min() ?? 999.0
+                            bestPerm += minD
+                        }
+                        bestPerm /= Double(k)
+                        score = min(inOrder, bestPerm + 20.0) - bonus
+                    } else {
+                        score = inOrder - bonus
+                    }
+                } else {
+                    var totalDist = 0.0
+                    for u in uResampled {
+                        let minD = medResampled.map { strokeDist(u, $0) }.min() ?? 999.0
+                        totalDist += minD
+                    }
+                    totalDist /= Double(k)
+                    let penalty = 45.0 * Double(abs(medPts.count - k))
+                    score = totalDist + penalty - bonus
+                }
+                
+                candidates.append((char: ch, pinyin: py, hanviet: hv, score: score))
+            }
+        }
+        
+        candidates.sort { $0.score < $1.score }
+        return Array(candidates.prefix(limit))
+    }
 }

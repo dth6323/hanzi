@@ -23,7 +23,8 @@ class _WordData {
   final List<Sense> senses;
   final Map<String, List<String>> rel;
   final List<Note> notes;
-  _WordData(this.word, this.senses, this.rel, this.notes);
+  final List<HanChar> chars;
+  _WordData(this.word, this.senses, this.rel, this.notes, this.chars);
 }
 
 class _WordScreenState extends State<WordScreen> {
@@ -34,15 +35,23 @@ class _WordScreenState extends State<WordScreen> {
     final db = DictDb.instance;
     final w = await db.word(widget.wordId);
     if (w == null) return null;
+    final cjk = cjkChars(w.simp);
     final res = await Future.wait([
       db.senses(w.id),
       db.relations(w.id),
       db.notes(w.id),
+      Future.wait(cjk.map(db.char)),
     ]);
     _fav = await UserDb.instance.isFavorite(w.id);
     UserDb.instance.addHistory(w.id, w.simp, w.pinyin, w.shortMean);
-    return _WordData(w, res[0] as List<Sense>,
-        res[1] as Map<String, List<String>>, res[2] as List<Note>);
+    final hanChars = (res[3] as List<HanChar?>).whereType<HanChar>().toList();
+    return _WordData(
+      w,
+      res[0] as List<Sense>,
+      res[1] as Map<String, List<String>>,
+      res[2] as List<Note>,
+      hanChars,
+    );
   }
 
   @override
@@ -111,7 +120,10 @@ class _WordScreenState extends State<WordScreen> {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       children: [
         _header(w),
-        if (chars.isNotEmpty) ...[
+        if (d.chars.isNotEmpty) ...[
+          const SectionTitle('Cấu tạo chữ Hán & Bộ thủ'),
+          for (final hc in d.chars) _charBreakdownCard(hc),
+        ] else if (chars.isNotEmpty) ...[
           const SectionTitle('Chữ Hán · luyện viết'),
           Wrap(
             spacing: 10,
@@ -308,6 +320,186 @@ class _WordScreenState extends State<WordScreen> {
           ),
         ),
       );
+
+  Widget _charBreakdownCard(HanChar c) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Colors.white10),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => Navigator.push(
+          context,
+          appRoute((_) => CharScreen(char: c.char)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Container(
+                width: 54,
+                height: 54,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.paper,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  c.char,
+                  style: const TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          c.char,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.text,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          c.pinyin,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.gold,
+                          ),
+                        ),
+                        if (c.hanviet.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            c.hanviet.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.muted,
+                            ),
+                          ),
+                        ],
+                        if (c.strokeCount != null) ...[
+                          const Spacer(),
+                          Text(
+                            '${c.strokeCount} nét',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.muted,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if (c.radical != null && c.radical!.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.35),
+                              ),
+                            ),
+                            child: Text(
+                              'Bộ: ${c.radical}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        if (c.components.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface2,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: Colors.white12),
+                            ),
+                            child: Text(
+                              'Ghép: ${c.components.join(' + ')}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.text,
+                              ),
+                            ),
+                          ),
+                        if (c.liushu != null && c.liushu!.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.gold.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              c.liushu!,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.gold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 4),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                iconSize: 20,
+                color: AppColors.gold,
+                tooltip: 'Luyện viết chữ ${c.char}',
+                icon: const Icon(Icons.draw_rounded),
+                onPressed: () => Navigator.push(
+                  context,
+                  appRoute((_) => PracticeScreen(chars: [c.char])),
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: AppColors.muted,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class ExampleView extends StatelessWidget {

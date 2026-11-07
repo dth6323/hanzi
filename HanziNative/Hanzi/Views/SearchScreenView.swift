@@ -5,6 +5,7 @@ struct SearchScreenView: View {
     @State private var searchResults: [Word] = []
     @State private var history: [Word] = []
     @State private var showOcr = false
+    @State private var showHandwriting = false
     @State private var searchWorkItem: DispatchWorkItem?
     
     var body: some View {
@@ -45,6 +46,14 @@ struct SearchScreenView: View {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundColor(AppColors.muted)
                         }
+                    }
+                    
+                    Button {
+                        showHandwriting = true
+                    } label: {
+                        Image(systemName: "pencil.and.outline")
+                            .font(.system(size: 20))
+                            .foregroundColor(AppColors.primary)
                     }
                     
                     Button {
@@ -116,6 +125,12 @@ struct SearchScreenView: View {
             .navigationBarHidden(true)
             .sheet(isPresented: $showOcr) {
                 OcrScannerView()
+            }
+            .sheet(isPresented: $showHandwriting) {
+                HandwritingSearchView { text in
+                    query = text
+                    onSearchChanged(text)
+                }
             }
             .onAppear {
                 loadHistory()

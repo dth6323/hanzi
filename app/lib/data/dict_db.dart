@@ -8,6 +8,7 @@ import 'package:sqflite/sqflite.dart';
 import 'db_bridge.dart';
 import 'models.dart';
 import 'text_utils.dart';
+import '../writing/stroke_matcher.dart';
 
 /// Read-only access to the bundled dictionary (assets/db/vi_full.db).
 class DictDb {
@@ -434,5 +435,116 @@ class DictDb {
       [limit],
     );
     return rows.map(Example.fromRow).toList();
+  }
+
+  /// Recognizes a handwritten character from user-drawn stroke points in 1024 character space.
+  Future<List<({String char, String pinyin, String hanviet, double distance})>>
+      recognizeHandwriting(List<List<Pt>> strokes, {int limit = 12}) async {
+    if (strokes.isEmpty) return const [];
+    final k = strokes.length;
+    final minK = (k - 1).clamp(1, 40);
+    final maxK = k + 1;
+
+    final rows = await _db.rawQuery(
+      'SELECT char, pinyin, hanviet, stroke_count, popular, medians '
+      'FROM chars '
+      'WHERE stroke_count BETWEEN ? AND ? AND medians IS NOT NULL',
+      [minK, maxK],
+    );
+
+    const nPoints = 12;
+    final userResampled = strokes.map((s) => resample(s, nPoints)).toList();
+
+    const popBonus = {
+      'rất cao': 15.0,
+      'cao': 10.0,
+      'trung bình': 5.0,
+      'thấp': 0.0,
+      'rất thấp': -10.0,
+    };
+
+    double strokeDist(List<Pt> u, List<Pt> m) {
+      var dFwd = 0.0;
+      for (var i = 0; i < nPoints; i++) {
+        dFwd += u[i].dist(m[i]);
+      }
+      dFwd /= nPoints;
+
+      var dRev = 0.0;
+      for (var i = 0; i < nPoints; i++) {
+        dRev += u[nPoints - 1 - i].dist(m[i]);
+      }
+      dRev = (dRev / nPoints) + 20.0;
+
+      return dFwd < dRev ? dFwd : dRev;
+    }
+
+    final candidates =
+        <({String char, String pinyin, String hanviet, double distance})>[];
+
+    for (final r in rows) {
+      final medJson = r['medians'] as String?;
+      if (medJson == null || medJson.isEmpty) continue;
+
+      final med = (jsonDecode(medJson) as List)
+          .map((s) => (s as List)
+              .map((p) =>
+                  Pt((p[0] as num).toDouble(), (p[1] as num).toDouble()))
+              .toList())
+          .toList();
+
+      if (med.isEmpty) continue;
+
+      final ch = r['char'] as String;
+      final py = (r['pinyin'] as String?) ?? '';
+      final hv = (r['hanviet'] as String?) ?? '';
+      final pop = (r['popular'] as String?) ?? '';
+      final bonus = popBonus[pop] ?? 0.0;
+
+      final medResampled = med.map((s) => resample(s, nPoints)).toList();
+
+      double score;
+      if (med.length == k) {
+        var inOrder = 0.0;
+        for (var i = 0; i < k; i++) {
+          inOrder += strokeDist(userResampled[i], medResampled[i]);
+        }
+        inOrder /= k;
+
+        if (k <= 4) {
+          var bestPerm = 0.0;
+          for (final u in userResampled) {
+            var minD = double.infinity;
+            for (final m in medResampled) {
+              final d = strokeDist(u, m);
+              if (d < minD) minD = d;
+            }
+            bestPerm += minD;
+          }
+          bestPerm /= k;
+          score = (inOrder < bestPerm + 20.0 ? inOrder : bestPerm + 20.0) - bonus;
+        } else {
+          score = inOrder - bonus;
+        }
+      } else {
+        var totalDist = 0.0;
+        for (final u in userResampled) {
+          var minD = double.infinity;
+          for (final m in medResampled) {
+            final d = strokeDist(u, m);
+            if (d < minD) minD = d;
+          }
+          totalDist += minD;
+        }
+        totalDist /= k;
+        final penalty = 45.0 * (med.length - k).abs();
+        score = totalDist + penalty - bonus;
+      }
+
+      candidates.add((char: ch, pinyin: py, hanviet: hv, distance: score));
+    }
+
+    candidates.sort((a, b) => a.distance.compareTo(b.distance));
+    return candidates.take(limit).toList();
   }
 }
