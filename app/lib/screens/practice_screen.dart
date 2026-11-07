@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/dict_db.dart';
 import '../data/models.dart';
+import '../data/text_utils.dart';
 import '../data/user_db.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
@@ -12,7 +13,13 @@ import '../writing/stroke_matcher.dart';
 class PracticeScreen extends StatefulWidget {
   final List<String> chars;
   final String? title;
-  const PracticeScreen({super.key, required this.chars, this.title});
+  final Example? example;
+  const PracticeScreen({
+    super.key,
+    required this.chars,
+    this.title,
+    this.example,
+  });
   @override
   State<PracticeScreen> createState() => _PracticeScreenState();
 }
@@ -70,9 +77,19 @@ class _PracticeScreenState extends State<PracticeScreen> {
       _attemptsMap[_cur.char] = (_attemptsMap[_cur.char] ?? 0) + 1;
       _sessionMap[_cur.char] = (_sessionMap[_cur.char] ?? 0) + 1;
       final totalDone = _attemptsMap[_cur.char]!;
-      _feedback = mistakes == 0
-          ? 'Hoàn hảo! (Lần viết thứ $totalDone)'
-          : 'Hoàn thành lần thứ $totalDone · sai $mistakes nét';
+      if (widget.example != null) {
+        if (_index < _chars.length - 1) {
+          _feedback = mistakes == 0
+              ? 'Hoàn hảo chữ ${_index + 1}/${_chars.length}! Bấm "Chữ tiếp" ➡️'
+              : 'Đạt chữ ${_cur.char}! Bấm "Chữ tiếp" để viết chữ kế ➡️';
+        } else {
+          _feedback = 'Xuất sắc! Bạn đã viết xong toàn bộ câu ví dụ! 🎉';
+        }
+      } else {
+        _feedback = mistakes == 0
+            ? 'Hoàn hảo! (Lần viết thứ $totalDone)'
+            : 'Hoàn thành lần thứ $totalDone · sai $mistakes nét';
+      }
       _feedbackColor = AppColors.gold;
     });
   }
@@ -129,6 +146,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
             : const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
         children: [
+          if (widget.example != null) _sentenceBanner(widget.example!),
           SegmentedButton<WriteMode>(
             segments: const [
               ButtonSegment(
@@ -191,7 +209,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
               textAlign: TextAlign.center,
               style: const TextStyle(color: AppColors.muted),
             ),
-          if (_chars.length > 1) ...[
+          if (widget.example == null && _chars.length > 1) ...[
             const SizedBox(height: 12),
             SizedBox(
               height: 44,
@@ -345,6 +363,157 @@ class _PracticeScreenState extends State<PracticeScreen> {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _sentenceBanner(Example ex) {
+    int cjkCount = 0;
+    final tokens = <Widget>[];
+
+    for (final r in ex.zh.runes) {
+      final ch = String.fromCharCode(r);
+      if (hasCjk(ch)) {
+        final targetIndex = cjkCount;
+        cjkCount++;
+        final isActive = targetIndex == _index;
+        final isDone = (_sessionMap[ch] ?? 0) > 0 || targetIndex < _index;
+        final exists =
+            targetIndex < _chars.length && _chars[targetIndex].char == ch;
+
+        tokens.add(
+          InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: exists ? () => _go(targetIndex - _index) : null,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              decoration: BoxDecoration(
+                color: isActive
+                    ? AppColors.primary
+                    : (isDone
+                        ? AppColors.gold.withValues(alpha: 0.15)
+                        : AppColors.surface2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isActive
+                      ? AppColors.gold
+                      : (isDone
+                          ? AppColors.gold.withValues(alpha: 0.5)
+                          : Colors.white12),
+                  width: isActive ? 1.8 : 1.0,
+                ),
+              ),
+              child: Text(
+                ch,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                  color: isActive
+                      ? Colors.white
+                      : (isDone ? AppColors.gold : AppColors.text),
+                ),
+              ),
+            ),
+          ),
+        );
+      } else {
+        tokens.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Text(
+              ch,
+              style: const TextStyle(
+                fontSize: 22,
+                color: AppColors.muted,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.gold.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.format_quote_rounded,
+                        size: 14, color: AppColors.gold),
+                    SizedBox(width: 4),
+                    Text(
+                      'CÂU VÍ DỤ',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.gold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Chữ ${_index + 1}/${_chars.length}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.muted,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              SpeakButton(ex.zh, size: 22),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
+            runSpacing: 6,
+            children: tokens,
+          ),
+          if (ex.pinyin.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              ex.pinyin,
+              style: const TextStyle(
+                color: AppColors.gold,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+          if (ex.mean.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              ex.mean,
+              style: const TextStyle(
+                color: AppColors.text,
+                fontSize: 14,
+                height: 1.3,
+              ),
+            ),
+          ],
         ],
       ),
     );

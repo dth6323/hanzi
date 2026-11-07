@@ -395,4 +395,44 @@ class DictDb {
     }
     return out;
   }
+
+  /// Example sentences filtered by HSK level (via word senses).
+  Future<List<Example>> examplesByHsk(int hsk, {int limit = 40}) async {
+    final rows = await _db.rawQuery(
+      'SELECT DISTINCT e.id, e.zh, e.pinyin, e.mean '
+      'FROM examples e '
+      'JOIN sense_examples se ON se.example_id = e.id '
+      'JOIN senses s ON s.id = se.sense_id '
+      'WHERE s.hsk = ? AND length(e.zh) BETWEEN 4 AND 28 '
+      'LIMIT ?',
+      [hsk, limit],
+    );
+    return rows.map(Example.fromRow).toList();
+  }
+
+  /// Search example sentences by Chinese characters, pinyin, or Vietnamese meaning.
+  Future<List<Example>> searchExamples(String query, {int limit = 40}) async {
+    final q = '%${query.trim()}%';
+    final rows = await _db.rawQuery(
+      'SELECT id, zh, pinyin, mean FROM examples '
+      'WHERE (zh LIKE ? OR mean LIKE ? OR pinyin LIKE ?) AND length(zh) BETWEEN 3 AND 35 '
+      'LIMIT ?',
+      [q, q, q, limit],
+    );
+    return rows.map(Example.fromRow).toList();
+  }
+
+  /// Curated example sentences suitable for writing practice across elementary HSK levels.
+  Future<List<Example>> recommendedExamples({int limit = 30}) async {
+    final rows = await _db.rawQuery(
+      'SELECT DISTINCT e.id, e.zh, e.pinyin, e.mean '
+      'FROM examples e '
+      'JOIN sense_examples se ON se.example_id = e.id '
+      'JOIN senses s ON s.id = se.sense_id '
+      'WHERE s.hsk BETWEEN 1 AND 4 AND length(e.zh) BETWEEN 4 AND 22 '
+      'LIMIT ?',
+      [limit],
+    );
+    return rows.map(Example.fromRow).toList();
+  }
 }

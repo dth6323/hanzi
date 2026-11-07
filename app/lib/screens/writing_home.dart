@@ -9,6 +9,7 @@ import '../data/user_db.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import 'practice_screen.dart';
+import 'sentence_practice_screen.dart';
 
 class WritingHome extends StatefulWidget {
   const WritingHome({super.key});
@@ -180,6 +181,70 @@ class _WritingHomeState extends State<WritingHome> {
                 onSubmitted: (v) {
                   if (hasCjk(v)) _open(cjkChars(v));
                 },
+              ),
+              const SizedBox(height: 14),
+              InkWell(
+                borderRadius: BorderRadius.circular(18),
+                onTap: () => Navigator.push(
+                  context,
+                  appRoute((_) => const SentencePracticeScreen()),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.gold.withValues(alpha: 0.18),
+                        AppColors.surface,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    border: Border.all(
+                      color: AppColors.gold.withValues(alpha: 0.35),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.gold.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.format_quote_rounded,
+                            color: AppColors.gold, size: 26),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'Luyện viết theo câu ví dụ',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.text,
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Viết từng chữ trong câu hoàn chỉnh · HSK 1-6',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppColors.muted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.arrow_forward_ios_rounded,
+                          size: 16, color: AppColors.gold),
+                    ],
+                  ),
+                ),
               ),
               if (_selectedWords.isNotEmpty) ...[
                 const SizedBox(height: 12),

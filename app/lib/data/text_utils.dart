@@ -12,6 +12,14 @@ List<String> cjkChars(String s) {
       .toList();
 }
 
+/// Single CJK characters in [s] in original sequence order (not de-duplicated).
+List<String> cjkCharsOrdered(String s) {
+  return s.runes
+      .map(String.fromCharCode)
+      .where(_cjk.hasMatch)
+      .toList();
+}
+
 const _from =
     'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ'
     'āǎēěīǐōǒūǔǖǘǚǜü';

@@ -3,6 +3,7 @@ import SwiftUI
 struct PracticeView: View {
     let chars: [String]
     let title: String?
+    let example: Example?
     
     @State private var hanChars: [HanChar] = []
     @State private var currentIndex: Int = 0
@@ -13,9 +14,33 @@ struct PracticeView: View {
     @State private var score: Int? = nil
     @State private var attemptsMap: [String: Int] = [:]
     
-    init(chars: [String], title: String? = nil) {
+    struct SentenceToken: Identifiable {
+        let id: Int
+        let text: String
+        let isCjk: Bool
+        let cjkIndex: Int?
+    }
+    
+    init(chars: [String], title: String? = nil, example: Example? = nil) {
         self.chars = chars
         self.title = title
+        self.example = example
+    }
+    
+    private var sentenceTokens: [SentenceToken] {
+        guard let ex = example else { return [] }
+        var tokens: [SentenceToken] = []
+        var cjkIdx = 0
+        for (i, ch) in Array(ex.zh).enumerated() {
+            let s = String(ch)
+            if TextUtils.hasCjk(s) {
+                tokens.append(SentenceToken(id: i, text: s, isCjk: true, cjkIndex: cjkIdx))
+                cjkIdx += 1
+            } else {
+                tokens.append(SentenceToken(id: i, text: s, isCjk: false, cjkIndex: nil))
+            }
+        }
+        return tokens
     }
     
     private var currentChar: HanChar? {
@@ -40,8 +65,9 @@ struct PracticeView: View {
                 }
             } else {
                 VStack(spacing: 12) {
-                    // Multi-character selector if more than 1 char
-                    if hanChars.count > 1 {
+                    if let ex = example {
+                        sentenceBanner(ex)
+                    } else if hanChars.count > 1 {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 8) {
                                 ForEach(Array(hanChars.enumerated()), id: \.offset) { idx, hc in
@@ -227,12 +253,98 @@ struct PracticeView: View {
         attemptsMap[cur.char] = attempts
         self.score = sc
         
-        if mistakes == 0 {
+        if example != nil {
+            if currentIndex < hanChars.count - 1 {
+                feedback = mistakes == 0
+                    ? "Hoàn hảo chữ \(currentIndex + 1)/\(hanChars.count)! Bấm 'Chữ sau' ➡️"
+                    : "Đạt chữ \(cur.char)! Bấm 'Chữ sau' để viết tiếp ➡️"
+            } else {
+                feedback = "Xuất sắc! Bạn đã viết xong toàn bộ câu ví dụ! 🎉"
+            }
+            feedbackColor = Theme.gold
+        } else if mistakes == 0 {
             feedback = "Hoàn hảo! 100 điểm (Lần viết thứ \(attempts))"
             feedbackColor = Theme.gold
         } else {
             feedback = "Hoàn thành! Sai \(mistakes) nét · \(sc) điểm"
             feedbackColor = Theme.hint
         }
+    }
+    
+    private func sentenceBanner(_ ex: Example) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                HStack(spacing: 4) {
+                    Image(systemName: "quote.opening")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Theme.gold)
+                    Text("CÂU VÍ DỤ")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Theme.gold)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Theme.gold.opacity(0.15))
+                .cornerRadius(6)
+                
+                Text("Chữ \(currentIndex + 1)/\(hanChars.count)")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Theme.muted)
+                
+                Spacer()
+                
+                SpeakButton(text: ex.zh, size: 22)
+            }
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 4) {
+                    ForEach(sentenceTokens) { token in
+                        if token.isCjk, let targetIdx = token.cjkIndex {
+                            let isActive = targetIdx == currentIndex
+                            let exists = targetIdx < hanChars.count && hanChars[targetIdx].char == token.text
+                            Button(action: {
+                                if exists { selectChar(targetIdx) }
+                            }) {
+                                Text(token.text)
+                                    .font(.system(size: 20, weight: isActive ? .bold : .medium))
+                                    .foregroundColor(isActive ? .white : (targetIdx < currentIndex ? Theme.gold : Theme.text))
+                                    .padding(.horizontal, 5)
+                                    .padding(.vertical, 2)
+                                    .background(isActive ? Theme.vermilion : (targetIdx < currentIndex ? Theme.gold.opacity(0.15) : Theme.surface))
+                                    .cornerRadius(6)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .stroke(isActive ? Theme.gold : Color.clear, lineWidth: 1.5)
+                                    )
+                            }
+                        } else {
+                            Text(token.text)
+                                .font(.system(size: 20))
+                                .foregroundColor(Theme.muted)
+                        }
+                    }
+                }
+            }
+            
+            if !ex.pinyin.isEmpty {
+                Text(ex.pinyin)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(Theme.gold)
+            }
+            
+            if !ex.mean.isEmpty {
+                Text(ex.mean)
+                    .font(.system(size: 13))
+                    .foregroundColor(Theme.muted)
+            }
+        }
+        .padding(14)
+        .background(Theme.surface)
+        .cornerRadius(14)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Theme.gold.opacity(0.3), lineWidth: 1)
+        )
+        .padding(.horizontal, 16)
     }
 }

@@ -9,6 +9,7 @@ import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/pronunciation_sheet.dart';
 import 'char_screen.dart';
+import 'practice_screen.dart';
 
 class WordScreen extends StatefulWidget {
   final int wordId;
@@ -350,6 +351,31 @@ class ExampleView extends StatelessWidget {
                   pinyin: e.pinyin,
                   mean: e.mean,
                 ),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                iconSize: 19,
+                color: AppColors.gold,
+                tooltip: 'Luyện viết câu này',
+                icon: const Icon(Icons.draw_rounded),
+                onPressed: () {
+                  final chars = cjkCharsOrdered(e.zh);
+                  if (chars.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Không có chữ Hán trong câu này')),
+                    );
+                    return;
+                  }
+                  Navigator.push(
+                    context,
+                    appRoute((_) => PracticeScreen(
+                          chars: chars,
+                          title: 'Luyện viết câu ví dụ',
+                          example: e,
+                        )),
+                  );
+                },
               ),
             ],
           ),

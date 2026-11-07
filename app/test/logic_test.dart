@@ -32,6 +32,7 @@ void main() {
 
   test('cjkChars', () {
     expect(cjkChars('你好, 你们'), ['你', '好', '们']);
+    expect(cjkCharsOrdered('谢谢大家！'), ['谢', '谢', '大', '家']);
     expect(hasCjk('hao'), isFalse);
   });
 

@@ -136,6 +136,15 @@ struct WordDetailView: View {
                                     }
                                     Spacer()
                                     SpeakButtonView(text: ex.zh, size: 18)
+                                    NavigationLink(destination: PracticeView(
+                                        chars: TextUtils.cjkChars(in: ex.zh),
+                                        title: "Luyện viết câu",
+                                        example: ex
+                                    )) {
+                                        Image(systemName: "pencil.and.outline")
+                                            .font(.system(size: 18))
+                                            .foregroundColor(Theme.gold)
+                                    }
                                 }
                                 .padding(.leading, 32)
                                 .padding(.vertical, 4)
