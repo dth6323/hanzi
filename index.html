@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="/hanzi/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Hán Tự — Từ điển & Luyện viết tiếng Trung Offline">
+
+  <!-- iOS PWA meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#12100F">
+  <meta name="msapplication-navbutton-color" content="#12100F">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hán Tự">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <style>
+    html, body {
+      background-color: #12100F !important;
+      color: #F3ECE4;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      overscroll-behavior-x: none !important;
+      overscroll-behavior-y: auto;
+      touch-action: pan-y;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    flt-glass-pane {
+      background-color: #12100F !important;
+    }
+  </style>
+
+  <script>
+    // Hard-block iOS Safari native edge-swipe history navigation to eliminate white flash
+    window.addEventListener('touchstart', function(e) {
+      if (e.touches && e.touches.length === 1) {
+        const x = e.touches[0].clientX;
+        // Edge zone: left 25px or right 25px
+        if (x < 25 || x > window.innerWidth - 25) {
+          e.preventDefault();
+        }
+      }
+    }, { passive: false });
+  </script>
+
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <title>Hán Tự — Học tiếng Trung</title>
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+  <script>
+    window.__hanziSqlState = {
+      sqlPromise: null,
+      dictDb: null,
+      userDb: null
+    };
+
+    async function __initHanziSql() {
+      if (window.__hanziSqlState.dictDb && window.__hanziSqlState.userDb) {
+        return;
+      }
+      if (!window.__hanziSqlState.sqlPromise) {
+        window.__hanziSqlState.sqlPromise = (async function() {
+          const SQL = await initSqlJs({
+            locateFile: f => 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/' + f
+          });
+          // Load or fetch + decompress vi_full.db.gz (cached in IndexedDB for instant offline startup)
+          let dictBytes = await __idbGet('vi_full_db_v1');
+          if (!dictBytes) {
+            const resp = await fetch('vi_full.db.gz');
+            if (!resp.ok) throw new Error('Không tải được vi_full.db.gz (' + resp.status + ')');
+            const ds = new DecompressionStream('gzip');
+            const decompressed = resp.body.pipeThrough(ds);
+            const buf = await new Response(decompressed).arrayBuffer();
+            dictBytes = new Uint8Array(buf);
+            await __idbSet('vi_full_db_v1', dictBytes);
+          }
+          window.__hanziSqlState.dictDb = new SQL.Database(dictBytes);
+
+          // Load or create writable user.db from IndexedDB
+          const userBytes = await __idbGet('user_db_v1');
+          window.__hanziSqlState.userDb = userBytes
+            ? new SQL.Database(userBytes)
+            : new SQL.Database();
+        })();
+      }
+      await window.__hanziSqlState.sqlPromise;
+    }
+
+    function __openIdb() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('hanzi_offline_store', 1);
+        req.onupgradeneeded = () => req.result.createObjectStore('files');
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function __idbGet(key) {
+      try {
+        const db = await __openIdb();
+        return await new Promise((resolve, reject) => {
+          const tx = db.transaction('files', 'readonly');
+          const r = tx.objectStore('files').get(key);
+          r.onsuccess = () => resolve(r.result || null);
+          r.onerror = () => resolve(null);
+        });
+      } catch (_) {
+        return null;
+      }
+    }
+
+    async function __idbSet(key, val) {
+      try {
+        const db = await __openIdb();
+        await new Promise((resolve) => {
+          const tx = db.transaction('files', 'readwrite');
+          tx.objectStore('files').put(val, key);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => resolve();
+        });
+      } catch (_) {}
+    }
+
+    window.__hanziExecSql = async function(payloadJson) {
+      try {
+        await __initHanziSql();
+        const req = JSON.parse(payloadJson);
+        const isUser = req.db === 'user.db';
+        const db = isUser ? window.__hanziSqlState.userDb : window.__hanziSqlState.dictDb;
+        const stmt = db.prepare(req.sql);
+        if (req.args && req.args.length > 0) {
+          stmt.bind(req.args);
+        }
+        const rows = [];
+        while (stmt.step()) {
+          rows.push(stmt.getAsObject());
+        }
+        stmt.free();
+        if (isUser && !/^\s*SELECT/i.test(req.sql)) {
+          await __idbSet('user_db_v1', db.export());
+        }
+        return JSON.stringify({ rows: rows });
+      } catch (e) {
+        return JSON.stringify({ error: String(e) });
+      }
+    };
+
+    window.__hanziWebSpeak = function(text, slow) {
+      try {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = 'zh-CN';
+          u.rate = slow ? 0.55 : 0.9;
+          window.speechSynthesis.speak(u);
+          return true;
+        }
+      } catch (_) {}
+      return false;
+    };
+
+    window.__hanziActiveRec = null;
+
+    window.__hanziWebListen = function() {
+      return new Promise((resolve, reject) => {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) {
+          reject('Trình duyệt chưa hỗ trợ Web Speech API');
+          return;
+        }
+        try {
+          if (window.__hanziActiveRec) {
+            window.__hanziActiveRec.abort();
+          }
+          const rec = new SR();
+          window.__hanziActiveRec = rec;
+          rec.lang = 'zh-CN';
+          rec.continuous = false;
+          rec.interimResults = true;
+          let latest = '';
+          let settled = false;
+          rec.onresult = (e) => {
+            let txt = '';
+            for (let i = 0; i < e.results.length; i++) {
+              txt += e.results[i][0].transcript;
+            }
+            if (txt) latest = txt;
+          };
+          rec.onerror = (e) => {
+            if (!settled) {
+              settled = true;
+              if (latest) resolve(latest);
+              else reject('Lỗi Micro: ' + (e.error || 'không nhận được âm thanh'));
+            }
+          };
+          rec.onend = () => {
+            if (!settled) {
+              settled = true;
+              resolve(latest);
+            }
+          };
+          rec.start();
+          setTimeout(() => {
+            try { rec.stop(); } catch (_) {}
+          }, 5000);
+        } catch (err) {
+          reject(String(err));
+        }
+      });
+    };
+
+    window.__hanziWebStopListen = function() {
+      try {
+        if (window.__hanziActiveRec) {
+          window.__hanziActiveRec.stop();
+        }
+      } catch (_) {}
+    };
+  </script>
+</head>
+<body>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
