@@ -547,4 +547,24 @@ class DictDb {
     candidates.sort((a, b) => a.distance.compareTo(b.distance));
     return candidates.take(limit).toList();
   }
+
+  /// Words whose simplified form contains [char].
+  Future<List<Word>> wordsContainingChar(String char, {int limit = 30}) async {
+    final rows = await _db.rawQuery(
+      'SELECT $_wordCols FROM words WHERE simp LIKE ? '
+      'ORDER BY length(simp), rank IS NULL, rank LIMIT ?',
+      ['%$char%', limit],
+    );
+    return rows.map(Word.fromRow).toList();
+  }
+
+  /// Characters sharing the same radical.
+  Future<List<HanChar>> charsByRadical(String radical, {String? exclude, int limit = 40}) async {
+    final rows = await _db.rawQuery(
+      'SELECT * FROM chars WHERE radical = ? AND char != ? '
+      'ORDER BY stroke_count, char LIMIT ?',
+      [radical, exclude ?? '', limit],
+    );
+    return rows.map(HanChar.fromRow).toList();
+  }
 }

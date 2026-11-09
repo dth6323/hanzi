@@ -5,8 +5,9 @@ import '../data/models.dart';
 import '../data/user_db.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
-import 'flashcard_screen.dart';
+import 'grammar_screen.dart';
 import 'quiz_screen.dart';
+import 'word_list_screen.dart';
 
 class LearnHome extends StatelessWidget {
   const LearnHome({super.key});
@@ -56,75 +57,7 @@ class LearnHome extends StatelessWidget {
 
 void _openWords(BuildContext context, String title, Future<List<Word>> f) {
   Navigator.push(
-      context, appRoute((_) => _WordListScreen(title: title, future: f)));
-}
-
-class _WordListScreen extends StatelessWidget {
-  final String title;
-  final Future<List<Word>> future;
-  const _WordListScreen({required this.title, required this.future});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<Word>>(
-      future: future,
-      builder: (context, s) {
-        final words = s.data;
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(title),
-            actions: [
-              if (words != null && words.isNotEmpty)
-                TextButton.icon(
-                  onPressed: () async {
-                    final subset = words.take(30).toList();
-                    await UserDb.instance.importWordsToSrs(subset.map((w) => (
-                          id: w.id,
-                          simp: w.simp,
-                          pinyin: w.pinyin,
-                          mean: w.shortMean,
-                        )));
-                    final cards = subset
-                        .map((w) => SrsCard(
-                              wordId: w.id,
-                              simp: w.simp,
-                              pinyin: w.pinyin,
-                              mean: w.shortMean,
-                              reps: 0,
-                              intervalDays: 0,
-                              ease: 2.5,
-                              dueMs: 0,
-                              lastReviewMs: 0,
-                            ))
-                        .toList();
-                    if (context.mounted) {
-                      Navigator.push(
-                        context,
-                        appRoute((_) =>
-                            FlashcardScreen(cards: cards, title: title)),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.style_rounded,
-                      color: AppColors.gold, size: 18),
-                  label: const Text('Flashcard',
-                      style: TextStyle(color: AppColors.gold)),
-                ),
-            ],
-          ),
-          body: words == null
-              ? const Loading()
-              : ListView.separated(
-                  padding: const EdgeInsets.all(8),
-                  itemCount: words.length,
-                  separatorBuilder: (_, _) =>
-                      const Divider(height: 1, indent: 16),
-                  itemBuilder: (_, i) => WordTile.fromWord(words[i]),
-                ),
-        );
-      },
-    );
-  }
+      context, appRoute((_) => WordListScreen(title: title, future: f)));
 }
 
 class _HskTab extends StatelessWidget {
@@ -184,8 +117,6 @@ class _TopicTab extends StatefulWidget {
 
 class _TopicTabState extends State<_TopicTab>
     with AutomaticKeepAliveClientMixin {
-  // Created once: a future built inside build() re-queries the DB and flashes
-  // the loading spinner on every rebuild (e.g. when navigating back).
   late final Future<List<Topic>> _future = DictDb.instance.topics();
 
   @override
@@ -273,97 +204,13 @@ class _GrammarTabState extends State<_GrammarTab>
                         style: const TextStyle(fontWeight: FontWeight.w700)),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () => Navigator.push(
-                        context, appRoute((_) => _GrammarList(level: lv))),
+                        context, appRoute((_) => GrammarListScreen(level: lv))),
                   ),
                 ),
               ),
           ],
         );
       },
-    );
-  }
-}
-
-class _GrammarList extends StatefulWidget {
-  final String level;
-  const _GrammarList({required this.level});
-  @override
-  State<_GrammarList> createState() => _GrammarListState();
-}
-
-class _GrammarListState extends State<_GrammarList> {
-  late final Future<List<Grammar>> _future =
-      DictDb.instance.grammarByLevel(widget.level);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Ngữ pháp ${widget.level}')),
-      body: FutureBuilder<List<Grammar>>(
-        future: _future,
-        builder: (_, s) {
-          if (!s.hasData) return const Loading();
-          return ListView.separated(
-            padding: const EdgeInsets.all(8),
-            itemCount: s.data!.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (_, i) {
-              final g = s.data![i];
-              return ListTile(
-                title: Text(g.title,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: g.keywords.isEmpty
-                    ? null
-                    : Text(g.keywords,
-                        style: const TextStyle(color: AppColors.gold)),
-                onTap: () => Navigator.push(
-                    context, appRoute((_) => _GrammarDetail(g))),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _GrammarDetail extends StatelessWidget {
-  final Grammar g;
-  const _GrammarDetail(this.g);
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(g.level)),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Text(g.title,
-              style:
-                  const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
-          if (g.useFor.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text(g.useFor,
-                  style: const TextStyle(color: AppColors.muted)),
-            ),
-          const SizedBox(height: 16),
-          for (final p in g.body)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Text(p,
-                  style: TextStyle(
-                      fontSize: 16,
-                      height: 1.5,
-                      color: p.startsWith('Cấu trúc')
-                          ? AppColors.gold
-                          : AppColors.text,
-                      fontWeight: p.startsWith('Cấu trúc') ||
-                              p.endsWith(':')
-                          ? FontWeight.w700
-                          : FontWeight.normal)),
-            ),
-        ],
-      ),
     );
   }
 }

@@ -24,12 +24,24 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Build Web PWA with bundled vi_full.db.gz
+      - name: Install dependencies
         working-directory: app
         run: |
           mkdir -p assets/db
           touch assets/db/vi_full.db
           flutter pub get
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze --fatal-infos
+
+      - name: Test
+        working-directory: app
+        run: flutter test
+
+      - name: Build Web PWA with bundled vi_full.db.gz
+        working-directory: app
+        run: |
           flutter build web --release --base-href "/hanzi/"
           cp ../vi_full.db.gz build/web/vi_full.db.gz
 
