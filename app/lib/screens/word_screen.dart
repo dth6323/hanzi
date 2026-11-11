@@ -4,7 +4,6 @@ import '../data/dict_db.dart';
 import '../data/models.dart';
 import '../data/text_utils.dart';
 import '../data/user_db.dart';
-import '../services/speaker.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/pronunciation_sheet.dart';

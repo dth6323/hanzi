@@ -58,20 +58,21 @@ class DictDb {
     final q = raw.trim();
     if (q.isEmpty) return [];
     if (hasCjk(q)) {
+      final esc = escapeLike(q);
       final rows = await _db.rawQuery(
         'SELECT $_wordCols FROM words '
-        'WHERE simp LIKE ? OR trad LIKE ? '
+        "WHERE simp LIKE ? ESCAPE '\\' OR trad LIKE ? ESCAPE '\\' "
         'ORDER BY (simp = ? OR trad = ?) DESC, length(simp), rank '
         'LIMIT ?',
-        ['$q%', '$q%', q, q, limit],
+        ['$esc%', '$esc%', q, q, limit],
       );
       final list = rows.map(Word.fromRow).toList();
       if (list.length < 10 && q.length > 1) {
         // Fallback: words containing the query anywhere.
         final more = await _db.rawQuery(
-          'SELECT $_wordCols FROM words WHERE simp LIKE ? '
+          "SELECT $_wordCols FROM words WHERE simp LIKE ? ESCAPE '\\' "
           'ORDER BY rank LIMIT ?',
-          ['%$q%', limit],
+          ['%$esc%', limit],
         );
         _mergeInto(list, more.map(Word.fromRow));
       }
@@ -92,9 +93,9 @@ class DictDb {
       _mergeInto(result, py.map(Word.fromRow));
     }
     final hv = await _db.rawQuery(
-      'SELECT $_wordCols FROM words WHERE hanviet_key LIKE ? '
+      "SELECT $_wordCols FROM words WHERE hanviet_key LIKE ? ESCAPE '\\' "
       'ORDER BY (hanviet_key = ?) DESC, rank LIMIT 20',
-      ['$spaced%', spaced],
+      ['${escapeLike(spaced)}%', spaced],
     );
     _mergeInto(result, hv.map(Word.fromRow));
 
@@ -118,9 +119,9 @@ class DictDb {
         final phrase = tokens.join(' ');
         final likeRows = await _db.rawQuery(
           'SELECT $_wordCols FROM words WHERE id IN '
-          '(SELECT id FROM mean_fts_content WHERE c0 LIKE ? LIMIT 300) '
+          "(SELECT id FROM mean_fts_content WHERE c0 LIKE ? ESCAPE '\\' LIMIT 300) "
           'ORDER BY rank IS NULL, rank LIMIT 30',
-          ['%$phrase%'],
+          ['%${escapeLike(phrase)}%'],
         );
         _mergeInto(result, likeRows.map(Word.fromRow));
       }
@@ -303,6 +304,13 @@ class DictDb {
     return rows.map(Word.fromRow).toList();
   }
 
+  /// Word counts per HSK level (keeps the UI in sync with the bundled DB).
+  Future<Map<int, int>> hskCounts() async {
+    final rows = await _db.rawQuery(
+        'SELECT hsk, COUNT(*) AS n FROM words WHERE hsk IS NOT NULL GROUP BY hsk');
+    return {for (final r in rows) r['hsk'] as int: r['n'] as int};
+  }
+
   Future<List<Topic>> topics() async {
     final rows = await _db.rawQuery(
         'SELECT t.id, t.name, COUNT(wt.word_id) AS n FROM topics t '
@@ -413,10 +421,11 @@ class DictDb {
 
   /// Search example sentences by Chinese characters, pinyin, or Vietnamese meaning.
   Future<List<Example>> searchExamples(String query, {int limit = 40}) async {
-    final q = '%${query.trim()}%';
+    final q = '%${escapeLike(query.trim())}%';
     final rows = await _db.rawQuery(
       'SELECT id, zh, pinyin, mean FROM examples '
-      'WHERE (zh LIKE ? OR mean LIKE ? OR pinyin LIKE ?) AND length(zh) BETWEEN 3 AND 35 '
+      "WHERE (zh LIKE ? ESCAPE '\\' OR mean LIKE ? ESCAPE '\\' "
+      "OR pinyin LIKE ? ESCAPE '\\') AND length(zh) BETWEEN 3 AND 35 "
       'LIMIT ?',
       [q, q, q, limit],
     );

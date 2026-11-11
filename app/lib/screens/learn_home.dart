@@ -60,12 +60,30 @@ void _openWords(BuildContext context, String title, Future<List<Word>> f) {
       context, appRoute((_) => WordListScreen(title: title, future: f)));
 }
 
-class _HskTab extends StatelessWidget {
+class _HskTab extends StatefulWidget {
   const _HskTab();
-  static const _counts = [506, 750, 953, 972, 1059, 1123, 5601];
+  @override
+  State<_HskTab> createState() => _HskTabState();
+}
+
+class _HskTabState extends State<_HskTab>
+    with AutomaticKeepAliveClientMixin {
+  Map<int, int>? _counts;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    DictDb.instance.hskCounts().then((c) {
+      if (mounted) setState(() => _counts = c);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: 7,
@@ -73,6 +91,7 @@ class _HskTab extends StatelessWidget {
       itemBuilder: (_, i) {
         final lv = i + 1;
         final color = AppColors.hskColor(lv);
+        final count = _counts?[lv];
         return Card(
           child: ListTile(
             contentPadding:
@@ -84,7 +103,7 @@ class _HskTab extends StatelessWidget {
             ),
             title: Text(lv == 7 ? 'HSK 7–9' : 'HSK $lv',
                 style: const TextStyle(fontWeight: FontWeight.w700)),
-            subtitle: Text('${_counts[i]} từ vựng'),
+            subtitle: Text(count == null ? '…' : '$count từ vựng'),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

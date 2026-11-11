@@ -264,15 +264,29 @@ class UserDb {
   }
 
   Future<List<SrsCard>> dueSrsCards({int limit = 50}) async {
-    // Ensure all favorites are also in SRS deck
+    // Ensure all favorites are also in SRS deck (one batch, not N inserts).
     final favs = await favorites();
-    for (final f in favs) {
-      await addSrsIfAbsent(
-        f['word_id'] as int,
-        (f['simp'] as String?) ?? '',
-        (f['pinyin'] as String?) ?? '',
-        (f['mean'] as String?) ?? '',
-      );
+    if (favs.isNotEmpty) {
+      final batch = _db.batch();
+      final now = _now;
+      for (final f in favs) {
+        batch.insert(
+          'srs',
+          {
+            'word_id': f['word_id'],
+            'simp': (f['simp'] as String?) ?? '',
+            'pinyin': (f['pinyin'] as String?) ?? '',
+            'mean': (f['mean'] as String?) ?? '',
+            'reps': 0,
+            'interval_days': 0,
+            'ease': 2.5,
+            'due': now,
+            'last_review': 0,
+          },
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        );
+      }
+      await batch.commit(noResult: true);
     }
     final rows = await _db.query(
       'srs',
@@ -405,15 +419,19 @@ class UserDb {
       'favorites',
       'srs',
       'writing',
+      'quiz_runs',
       'activity_days',
     ]) {
       final list = decoded[table];
       if (list is List) {
         for (final item in list) {
           if (item is Map) {
+            final row = item.map((k, v) => MapEntry(k.toString(), v));
+            // quiz_runs has an AUTOINCREMENT id that may clash with local rows.
+            if (table == 'quiz_runs') row.remove('id');
             batch.insert(
               table,
-              item.map((k, v) => MapEntry(k.toString(), v)),
+              row,
               conflictAlgorithm: ConflictAlgorithm.replace,
             );
             count++;

@@ -122,8 +122,15 @@ class _QuizScreenState extends State<QuizScreen> {
         if (others.length < 3) continue;
 
         if (widget.type == QuizType.meaning) {
-          final opts = [w.shortMean, for (final o in others.take(3)) o.shortMean]
-            ..shuffle(rng);
+          // Nhiều từ HSK trùng short_mean — lọc để không có 2 lựa chọn giống nhau.
+          final distractorMeans = others
+              .map((o) => o.shortMean)
+              .where((m) => m.isNotEmpty && m != w.shortMean)
+              .toSet()
+              .take(3)
+              .toList();
+          if (distractorMeans.length < 3) continue;
+          final opts = [w.shortMean, ...distractorMeans]..shuffle(rng);
           _questions.add(_QuizQuestion(
             promptTitle: 'Nghĩa của từ này là gì?',
             promptMain: w.simp,
@@ -136,8 +143,9 @@ class _QuizScreenState extends State<QuizScreen> {
         } else if (widget.type == QuizType.pinyin) {
           final othersPy = others
               .where((o) => o.pinyin != w.pinyin && o.pinyin.isNotEmpty)
-              .take(3)
               .map((o) => o.pinyin)
+              .toSet()
+              .take(3)
               .toList();
           if (othersPy.length < 3) continue;
           final opts = [w.pinyin, ...othersPy]..shuffle(rng);
@@ -151,17 +159,22 @@ class _QuizScreenState extends State<QuizScreen> {
             explanation: '${w.simp} đọc là ${w.pinyin}',
           ));
         } else if (widget.type == QuizType.listening) {
-          final opts = [
-            '${w.simp} — ${w.shortMean}',
-            for (final o in others.take(3)) '${o.simp} — ${o.shortMean}'
-          ]..shuffle(rng);
+          final answer = '${w.simp} — ${w.shortMean}';
+          final distractors = others
+              .map((o) => '${o.simp} — ${o.shortMean}')
+              .where((s) => s != answer)
+              .toSet()
+              .take(3)
+              .toList();
+          if (distractors.length < 3) continue;
+          final opts = [answer, ...distractors]..shuffle(rng);
           _questions.add(_QuizQuestion(
             promptTitle: 'Nghe phát âm và chọn từ đúng:',
             promptMain: '🔊 Bấm để nghe',
             promptSub: 'Gợi ý Hán Việt: ${w.hanviet.isEmpty ? "—" : w.hanviet}',
             audioZh: w.simp,
             options: opts,
-            correctIndex: opts.indexOf('${w.simp} — ${w.shortMean}'),
+            correctIndex: opts.indexOf(answer),
             explanation: '${w.simp} (${w.pinyin}): ${w.shortMean}',
           ));
         }

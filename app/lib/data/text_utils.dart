@@ -27,6 +27,13 @@ const _to =
     'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyd'
     'aaeeiioouuvvvvv';
 
+/// Escapes LIKE wildcards (%, _, \) so user input matches literally.
+/// Use together with `ESCAPE '\'` in the SQL.
+String escapeLike(String s) => s
+    .replaceAll('\\', '\\\\')
+    .replaceAll('%', '\\%')
+    .replaceAll('_', '\\_');
+
 /// Strips Vietnamese and pinyin diacritics (input should be lower-case).
 String removeDiacritics(String s) {
   final b = StringBuffer();
